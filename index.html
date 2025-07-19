@@ -10,6 +10,7 @@
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             background: white;
+            position: relative;
         }
         .tool-btn {
             transition: all 0.2s ease;
@@ -18,8 +19,8 @@
             transform: translateY(-1px);
         }
         .active-tool {
-            background: #3b82f6;
-            color: white;
+            background: #3b82f6 !important;
+            color: white !important;
         }
         .modal {
             backdrop-filter: blur(4px);
@@ -29,6 +30,17 @@
         }
         .feed-post:hover {
             transform: translateY(-2px);
+        }
+        .animation-frame {
+            border: 2px solid #ddd;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .active-frame {
+            border-color: #3b82f6;
+        }
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -40,10 +52,10 @@
                 <div class="flex items-center space-x-4">
                     <h1 class="text-2xl font-bold text-purple-600">🎨 SharedDraw</h1>
                     <div id="modeButtons" class="flex space-x-2">
-                        <button id="drawModeBtn" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <button id="drawModeBtn" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
                             <span data-en="Drawing Mode" data-th="โหมดวาดรูป">Drawing Mode</span>
                         </button>
-                        <button id="animModeBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <button id="animModeBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
                             <span data-en="Animation Mode" data-th="โหมดแอนิเมชัน">Animation Mode</span>
                         </button>
                     </div>
@@ -53,15 +65,26 @@
                         <option value="en">English</option>
                         <option value="th">ไทย</option>
                     </select>
-                    <button id="loginBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
-                        <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
-                    </button>
-                    <button id="registerBtn" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
-                        <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
-                    </button>
-                    <button id="devLoginBtn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                        <span data-en="Dev Login" data-th="เข้าสู่ระบบนักพัฒนา">Dev Login</span>
-                    </button>
+                    <div id="authButtons">
+                        <button id="loginBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                            <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
+                        </button>
+                        <button id="registerBtn" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+                            <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
+                        </button>
+                        <button id="devLoginBtn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            <span data-en="Dev Login" data-th="เข้าสู่ระบบนักพัฒนา">Dev Login</span>
+                        </button>
+                    </div>
+                    <div id="userInfo" class="hidden flex items-center space-x-4">
+                        <span id="welcomeText" class="text-gray-700"></span>
+                        <span id="serviceStatus" class="hidden px-2 py-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs rounded-full">
+                            <span data-en="PorchXChing Active" data-th="PorchXChing ใช้งานได้">PorchXChing Active</span>
+                        </span>
+                        <button id="logoutBtn" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                            <span data-en="Logout" data-th="ออกจากระบบ">Logout</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -81,67 +104,70 @@
                             <span data-en="Publish" data-th="เผยแพร่">Publish</span>
                         </button>
                     </div>
-                    
-                    <!-- Login Required Message (shown when not logged in) -->
-                    <div id="loginRequired" class="text-center py-16 bg-gray-50 rounded-lg">
-                        <div class="text-6xl mb-4">🔒</div>
-                        <h3 class="text-2xl font-bold text-gray-700 mb-4">
-                            <span data-en="Login Required" data-th="ต้องเข้าสู่ระบบ">Login Required</span>
-                        </h3>
-                        <p class="text-gray-600 mb-6">
-                            <span data-en="Please login to access drawing and animation tools" data-th="กรุณาเข้าสู่ระบบเพื่อใช้เครื่องมือวาดรูปและแอนิเมชัน">Please login to access drawing and animation tools</span>
-                        </p>
-                        <div class="space-x-4">
-                            <button id="loginFromCanvas" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
-                                <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
+
+                    <!-- Drawing Tools -->
+                    <div id="drawingTools" class="flex flex-wrap gap-2 mb-4 p-4 bg-gray-50 rounded-lg">
+                        <button id="penTool" class="tool-btn px-3 py-2 bg-blue-500 text-white rounded active-tool">
+                            <span data-en="✏️ Pen" data-th="✏️ ปากกา">✏️ Pen</span>
+                        </button>
+                        <button id="brushTool" class="tool-btn px-3 py-2 bg-gray-200 rounded">
+                            <span data-en="🖌️ Brush" data-th="🖌️ พู่กัน">🖌️ Brush</span>
+                        </button>
+                        <button id="eraserTool" class="tool-btn px-3 py-2 bg-gray-200 rounded">
+                            <span data-en="🧹 Eraser" data-th="🧹 ยางลบ">🧹 Eraser</span>
+                        </button>
+                        <button id="rectangleTool" class="tool-btn px-3 py-2 bg-gray-200 rounded">
+                            <span data-en="⬜ Rectangle" data-th="⬜ สี่เหลี่ยม">⬜ Rectangle</span>
+                        </button>
+                        <button id="circleTool" class="tool-btn px-3 py-2 bg-gray-200 rounded">
+                            <span data-en="⭕ Circle" data-th="⭕ วงกลม">⭕ Circle</span>
+                        </button>
+                        <input type="color" id="colorPicker" value="#000000" class="w-12 h-10 rounded border-2">
+                        <input type="range" id="brushSize" min="1" max="50" value="5" class="w-20">
+                        <button id="clearCanvas" class="tool-btn px-3 py-2 bg-red-500 text-white rounded">
+                            <span data-en="🗑️ Clear" data-th="🗑️ ล้าง">🗑️ Clear</span>
+                        </button>
+                    </div>
+
+                    <!-- Animation Controls -->
+                    <div id="animationControls" class="hidden mb-4 p-4 bg-blue-50 rounded-lg">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <button id="addFrameBtn" class="px-3 py-2 bg-green-500 text-white rounded">
+                                <span data-en="+ Add Frame" data-th="+ เพิ่มเฟรม">+ Add Frame</span>
                             </button>
-                            <button id="registerFromCanvas" class="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
-                                <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
+                            <button id="playAnimBtn" class="px-3 py-2 bg-blue-500 text-white rounded">
+                                <span data-en="▶️ Play" data-th="▶️ เล่น">▶️ Play</span>
                             </button>
+                            <button id="stopAnimBtn" class="px-3 py-2 bg-red-500 text-white rounded">
+                                <span data-en="⏹️ Stop" data-th="⏹️ หยุด">⏹️ Stop</span>
+                            </button>
+                            <label class="flex items-center space-x-2">
+                                <span data-en="Speed:" data-th="ความเร็ว:">Speed:</span>
+                                <input type="range" id="animSpeed" min="100" max="1000" value="500" class="w-20">
+                            </label>
+                        </div>
+                        <div id="framesList" class="flex space-x-2 overflow-x-auto p-2 bg-white rounded border">
+                            <!-- Animation frames will be added here -->
                         </div>
                     </div>
 
-                    <!-- Drawing Tools (hidden when not logged in) -->
-                    <div id="drawingTools" class="hidden">
-                        <!-- Tools -->
-                        <div class="flex flex-wrap gap-2 mb-4 p-4 bg-gray-50 rounded-lg">
-                            <button class="tool-btn px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100" data-tool="pen">🖊️ Pen</button>
-                            <button class="tool-btn px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100" data-tool="brush">🖌️ Brush</button>
-                            <button class="tool-btn px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100" data-tool="eraser">🧹 Eraser</button>
-                            <input type="color" id="colorPicker" value="#000000" class="w-12 h-10 border border-gray-300 rounded-lg cursor-pointer">
-                            <input type="range" id="brushSize" min="1" max="20" value="3" class="w-20">
-                            <button id="clearCanvas" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                                <span data-en="Clear" data-th="ล้าง">Clear</span>
-                            </button>
-                        </div>
-
-                        <!-- Animation Controls (hidden by default) -->
-                        <div id="animationControls" class="hidden mb-4 p-4 bg-blue-50 rounded-lg">
-                            <div class="flex items-center space-x-4">
-                                <button id="playBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">▶️ Play</button>
-                                <button id="pauseBtn" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">⏸️ Pause</button>
-                                <button id="addFrameBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">+ Frame</button>
-                                <span class="text-sm text-gray-600">Frame: <span id="currentFrame">1</span>/<span id="totalFrames">1</span></span>
-                            </div>
-                        </div>
-
-                        <!-- Canvas -->
-                        <div class="canvas-container">
-                            <canvas id="drawingCanvas" width="600" height="400" class="w-full cursor-crosshair"></canvas>
-                        </div>
+                    <!-- Canvas -->
+                    <div class="canvas-container">
+                        <canvas id="drawingCanvas" width="800" height="600" class="block mx-auto cursor-crosshair"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Feed -->
+            <!-- Feed & Social -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
                         <span data-en="Community Feed" data-th="ฟีดชุมชน">Community Feed</span>
-                    </h2>
+                    </h3>
                     <div id="feedContainer" class="space-y-4 max-h-96 overflow-y-auto">
                         <div class="text-center text-gray-500 py-8">
-                            <p data-en="No posts yet. Be the first to share your artwork!" data-th="ยังไม่มีโพสต์ เป็นคนแรกที่แชร์ผลงานของคุณ!">No posts yet. Be the first to share your artwork!</p>
+                            <p class="text-lg">🎨</p>
+                            <p data-en="No posts yet. Create and publish your first artwork!" data-th="ยังไม่มีโพสต์ สร้างและเผยแพร่งานศิลปะแรกของคุณ!">No posts yet. Create and publish your first artwork!</p>
                         </div>
                     </div>
                 </div>
@@ -152,28 +178,28 @@
     <!-- Login Modal -->
     <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50">
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
                 <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
-            </h3>
-            <form id="loginForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+            </h2>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
                         <span data-en="Username" data-th="ชื่อผู้ใช้">Username</span>
                     </label>
-                    <input type="text" id="loginUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <input type="text" id="loginUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
                         <span data-en="Password" data-th="รหัสผ่าน">Password</span>
                     </label>
-                    <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
                 </div>
-                <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600 transition-colors">
-                        <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
-                    </button>
-                    <button type="button" id="closeLoginModal" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                <div class="flex justify-between">
+                    <button type="button" id="closeLoginModal" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                         <span data-en="Cancel" data-th="ยกเลิก">Cancel</span>
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600">
+                        <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
                     </button>
                 </div>
             </form>
@@ -183,34 +209,34 @@
     <!-- Register Modal -->
     <div id="registerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50">
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
                 <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
-            </h3>
-            <form id="registerForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+            </h2>
+            <form id="registerForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
                         <span data-en="Username" data-th="ชื่อผู้ใช้">Username</span>
                     </label>
-                    <input type="text" id="regUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <input type="text" id="registerUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
                         <span data-en="Email" data-th="อีเมล">Email</span>
                     </label>
-                    <input type="email" id="regEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <input type="email" id="registerEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
                         <span data-en="Password" data-th="รหัสผ่าน">Password</span>
                     </label>
-                    <input type="password" id="regPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <input type="password" id="registerPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
                 </div>
-                <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors">
-                        <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
-                    </button>
-                    <button type="button" id="closeRegisterModal" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                <div class="flex justify-between">
+                    <button type="button" id="closeRegisterModal" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                         <span data-en="Cancel" data-th="ยกเลิก">Cancel</span>
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                        <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
                     </button>
                 </div>
             </form>
@@ -220,32 +246,28 @@
     <!-- Developer Login Modal -->
     <div id="devLoginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50">
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <h2 class="text-2xl font-bold text-red-600 mb-6">
                 <span data-en="Developer Login" data-th="เข้าสู่ระบบนักพัฒนา">Developer Login</span>
-            </h3>
-            <form id="devLoginForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+            </h2>
+            <form id="devLoginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
                         <span data-en="Developer Name" data-th="ชื่อนักพัฒนา">Developer Name</span>
                     </label>
-                    <select id="devName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                        <option value="">Select Developer</option>
-                        <option value="PorchPhaseXForever">PorchPhaseXForever</option>
-                        <option value="ChingDEV01">ChingDEV01</option>
-                    </select>
+                    <input type="text" id="devName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" required>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <span data-en="Developer Code" data-th="รหัสนักพัฒนา">Developer Code</span>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <span data-en="Access Code" data-th="รหัสเข้าถึง">Access Code</span>
                     </label>
-                    <input type="password" id="devCode" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    <input type="password" id="devCode" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" required>
                 </div>
-                <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
-                        <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
-                    </button>
-                    <button type="button" id="closeDevLoginModal" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                <div class="flex justify-between">
+                    <button type="button" id="closeDevLoginModal" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                         <span data-en="Cancel" data-th="ยกเลิก">Cancel</span>
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                        <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
                     </button>
                 </div>
             </form>
@@ -255,34 +277,35 @@
     <!-- Report Modal -->
     <div id="reportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50">
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-            <h3 class="text-2xl font-bold text-gray-800 mb-6">
-                <span data-en="Report Post" data-th="รายงานโพสต์">Report Post</span>
-            </h3>
-            <form id="reportForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+            <h2 class="text-2xl font-bold text-red-600 mb-6">
+                <span data-en="Report Content" data-th="รายงานเนื้อหา">Report Content</span>
+            </h2>
+            <form id="reportForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
                         <span data-en="Reason" data-th="เหตุผล">Reason</span>
                     </label>
-                    <select id="reportReason" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                        <option value="inappropriate">Inappropriate Content</option>
-                        <option value="spam">Spam</option>
-                        <option value="harassment">Harassment</option>
-                        <option value="copyright">Copyright Violation</option>
-                        <option value="other">Other</option>
+                    <select id="reportReason" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" required>
+                        <option value="">Select reason...</option>
+                        <option value="inappropriate" data-en="Inappropriate content" data-th="เนื้อหาไม่เหมาะสม">Inappropriate content</option>
+                        <option value="spam" data-en="Spam" data-th="สแปม">Spam</option>
+                        <option value="harassment" data-en="Harassment" data-th="การคุกคาม">Harassment</option>
+                        <option value="copyright" data-en="Copyright violation" data-th="ละเมิดลิขสิทธิ์">Copyright violation</option>
+                        <option value="other" data-en="Other" data-th="อื่นๆ">Other</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
                         <span data-en="Additional Details" data-th="รายละเอียดเพิ่มเติม">Additional Details</span>
                     </label>
-                    <textarea id="reportDetails" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"></textarea>
+                    <textarea id="reportDetails" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" rows="4"></textarea>
                 </div>
-                <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
-                        <span data-en="Submit Report" data-th="ส่งรายงาน">Submit Report</span>
-                    </button>
-                    <button type="button" id="closeReportModal" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                <div class="flex justify-between">
+                    <button type="button" id="closeReportModal" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                         <span data-en="Cancel" data-th="ยกเลิก">Cancel</span>
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                        <span data-en="Submit Report" data-th="ส่งรายงาน">Submit Report</span>
                     </button>
                 </div>
             </form>
@@ -291,21 +314,15 @@
 
     <script>
         // Global variables
+        let currentUser = null;
+        let currentLanguage = 'en';
         let currentMode = 'drawing';
         let currentTool = 'pen';
         let isDrawing = false;
-        let currentUser = null;
-        let currentDeveloper = null;
-        let currentLanguage = 'en';
-        let animationFrames = [[]];
+        let canvas, ctx;
+        let animationFrames = [];
         let currentFrame = 0;
-        let isPlaying = false;
-
-        // Canvas setup
-        const canvas = document.getElementById('drawingCanvas');
-        const ctx = canvas.getContext('2d');
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        let animationInterval = null;
 
         // Developer credentials
         const developers = {
@@ -313,56 +330,222 @@
             'ChingDEV01': 'imadmin02'
         };
 
-        // Language switching
-        function switchLanguage(lang) {
-            currentLanguage = lang;
-            document.querySelectorAll('[data-en]').forEach(element => {
-                const text = element.getAttribute(`data-${lang}`);
-                if (text) {
-                    element.textContent = text;
+        // PorchXChing Service - Premium features
+        const porchXChingService = {
+            features: ['Advanced Animation Tools', 'HD Export', 'Cloud Storage', 'Priority Support'],
+            isActive: false,
+            activateService: function(user) {
+                if (user && user.type === 'developer') {
+                    this.isActive = true;
+                    showNotification('PorchXChing Service Activated! 🚀', 'success');
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        // User storage (empty by default - users must register)
+        const users = {};
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCanvas();
+            setupEventListeners();
+            updateLanguage();
+        });
+
+        function initializeCanvas() {
+            canvas = document.getElementById('drawingCanvas');
+            ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#000000';
+            
+            // Add first animation frame
+            animationFrames.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        }
+
+        function setupEventListeners() {
+            // Language selector
+            document.getElementById('languageSelect').addEventListener('change', function() {
+                currentLanguage = this.value;
+                updateLanguage();
+            });
+
+            // Mode buttons
+            document.getElementById('drawModeBtn').addEventListener('click', () => switchMode('drawing'));
+            document.getElementById('animModeBtn').addEventListener('click', () => switchMode('animation'));
+
+            // Auth buttons
+            document.getElementById('loginBtn').addEventListener('click', () => showModal('loginModal'));
+            document.getElementById('registerBtn').addEventListener('click', () => showModal('registerModal'));
+            document.getElementById('devLoginBtn').addEventListener('click', () => showModal('devLoginModal'));
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+
+            // Modal close buttons
+            document.getElementById('closeLoginModal').addEventListener('click', () => hideModal('loginModal'));
+            document.getElementById('closeRegisterModal').addEventListener('click', () => hideModal('registerModal'));
+            document.getElementById('closeDevLoginModal').addEventListener('click', () => hideModal('devLoginModal'));
+            document.getElementById('closeReportModal').addEventListener('click', () => hideModal('reportModal'));
+
+            // Forms
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            document.getElementById('devLoginForm').addEventListener('submit', handleDevLogin);
+            document.getElementById('reportForm').addEventListener('submit', handleReport);
+
+            // Drawing tools
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.id.includes('Tool')) {
+                        selectTool(this.id.replace('Tool', ''));
+                    }
+                });
+            });
+
+            document.getElementById('colorPicker').addEventListener('change', function() {
+                ctx.strokeStyle = this.value;
+                ctx.fillStyle = this.value;
+            });
+
+            document.getElementById('brushSize').addEventListener('input', function() {
+                ctx.lineWidth = this.value;
+            });
+
+            document.getElementById('clearCanvas').addEventListener('click', clearCanvas);
+
+            // Canvas drawing events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // Animation controls
+            document.getElementById('addFrameBtn').addEventListener('click', addAnimationFrame);
+            document.getElementById('playAnimBtn').addEventListener('click', playAnimation);
+            document.getElementById('stopAnimBtn').addEventListener('click', stopAnimation);
+
+            // Publish button
+            document.getElementById('publishBtn').addEventListener('click', publishArtwork);
+
+            // Report buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('report-btn')) {
+                    showModal('reportModal');
+                }
+            });
+
+            // Comment functionality
+            document.addEventListener('keypress', function(e) {
+                if (e.target.classList.contains('comment-input') && e.key === 'Enter') {
+                    addComment(e.target);
+                }
+            });
+
+            // Like functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('like-btn')) {
+                    toggleLike(e.target);
                 }
             });
         }
 
-        // Mode switching
+        function updateLanguage() {
+            document.querySelectorAll('[data-en]').forEach(element => {
+                const text = element.getAttribute(`data-${currentLanguage}`);
+                if (text) {
+                    element.textContent = text;
+                }
+            });
+
+            // Update select options
+            document.querySelectorAll('option[data-en]').forEach(option => {
+                const text = option.getAttribute(`data-${currentLanguage}`);
+                if (text) {
+                    option.textContent = text;
+                }
+            });
+        }
+
         function switchMode(mode) {
             currentMode = mode;
-            const animControls = document.getElementById('animationControls');
+            const drawingTools = document.getElementById('drawingTools');
+            const animationControls = document.getElementById('animationControls');
             const canvasTitle = document.getElementById('canvasTitle');
-            
-            if (mode === 'animation') {
-                animControls.classList.remove('hidden');
-                canvasTitle.querySelector('span').textContent = currentLanguage === 'en' ? 'Animation Canvas' : 'พื้นที่แอนิเมชัน';
+
+            if (mode === 'drawing') {
+                drawingTools.classList.remove('hidden');
+                animationControls.classList.add('hidden');
+                canvasTitle.innerHTML = `<span data-en="Drawing Canvas" data-th="พื้นที่วาดรูป">Drawing Canvas</span>`;
+                document.getElementById('drawModeBtn').classList.add('bg-purple-600');
+                document.getElementById('animModeBtn').classList.remove('bg-blue-600');
             } else {
-                animControls.classList.add('hidden');
-                canvasTitle.querySelector('span').textContent = currentLanguage === 'en' ? 'Drawing Canvas' : 'พื้นที่วาดรูป';
+                drawingTools.classList.add('hidden');
+                animationControls.classList.remove('hidden');
+                canvasTitle.innerHTML = `<span data-en="Animation Canvas" data-th="พื้นที่แอนิเมชัน">Animation Canvas</span>`;
+                document.getElementById('animModeBtn').classList.add('bg-blue-600');
+                document.getElementById('drawModeBtn').classList.remove('bg-purple-600');
+                updateFramesList();
+            }
+            updateLanguage();
+        }
+
+        function selectTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('active-tool');
+            });
+            document.getElementById(tool + 'Tool').classList.add('active-tool');
+
+            // Update cursor
+            switch(tool) {
+                case 'eraser':
+                    canvas.style.cursor = 'grab';
+                    break;
+                case 'pen':
+                case 'brush':
+                    canvas.style.cursor = 'crosshair';
+                    break;
+                default:
+                    canvas.style.cursor = 'crosshair';
             }
         }
 
-        // Drawing functions
         function startDrawing(e) {
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
-            ctx.beginPath();
-            ctx.moveTo(x, y);
+
+            if (currentTool === 'pen' || currentTool === 'brush') {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            } else if (currentTool === 'eraser') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, ctx.lineWidth, 0, 2 * Math.PI);
+                ctx.fill();
+            }
         }
 
         function draw(e) {
             if (!isDrawing) return;
-            
+
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
-            ctx.lineWidth = document.getElementById('brushSize').value;
-            ctx.strokeStyle = currentTool === 'eraser' ? '#FFFFFF' : document.getElementById('colorPicker').value;
-            ctx.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
-            
-            ctx.lineTo(x, y);
-            ctx.stroke();
+
+            if (currentTool === 'pen' || currentTool === 'brush') {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentTool === 'eraser') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, ctx.lineWidth, 0, 2 * Math.PI);
+                ctx.fill();
+            }
         }
 
         function stopDrawing() {
@@ -370,55 +553,72 @@
                 isDrawing = false;
                 ctx.beginPath();
                 
-                // Save frame for animation mode
+                // Update current animation frame
                 if (currentMode === 'animation') {
                     animationFrames[currentFrame] = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 }
             }
         }
 
-        // Animation functions
-        function addFrame() {
-            animationFrames.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (currentMode === 'animation') {
+                animationFrames[currentFrame] = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function addAnimationFrame() {
+            const newFrame = ctx.createImageData(canvas.width, canvas.height);
+            animationFrames.push(newFrame);
             currentFrame = animationFrames.length - 1;
-            updateFrameDisplay();
             clearCanvas();
+            updateFramesList();
+        }
+
+        function updateFramesList() {
+            const framesList = document.getElementById('framesList');
+            framesList.innerHTML = '';
+            
+            animationFrames.forEach((frame, index) => {
+                const frameDiv = document.createElement('div');
+                frameDiv.className = `animation-frame w-16 h-12 bg-gray-200 rounded cursor-pointer ${index === currentFrame ? 'active-frame' : ''}`;
+                frameDiv.textContent = index + 1;
+                frameDiv.addEventListener('click', () => selectFrame(index));
+                framesList.appendChild(frameDiv);
+            });
+        }
+
+        function selectFrame(index) {
+            // Save current frame
+            if (currentFrame < animationFrames.length) {
+                animationFrames[currentFrame] = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            }
+            
+            // Load selected frame
+            currentFrame = index;
+            ctx.putImageData(animationFrames[index], 0, 0);
+            updateFramesList();
         }
 
         function playAnimation() {
-            if (isPlaying) return;
-            isPlaying = true;
+            if (animationInterval) return;
+            
+            const speed = document.getElementById('animSpeed').value;
             let frameIndex = 0;
             
-            const interval = setInterval(() => {
-                if (!isPlaying) {
-                    clearInterval(interval);
-                    return;
-                }
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                if (animationFrames[frameIndex]) {
-                    ctx.putImageData(animationFrames[frameIndex], 0, 0);
-                }
-                
+            animationInterval = setInterval(() => {
+                ctx.putImageData(animationFrames[frameIndex], 0, 0);
                 frameIndex = (frameIndex + 1) % animationFrames.length;
-            }, 200);
+            }, parseInt(speed));
         }
 
-        function pauseAnimation() {
-            isPlaying = false;
+        function stopAnimation() {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+            }
         }
 
-        function updateFrameDisplay() {
-            document.getElementById('currentFrame').textContent = currentFrame + 1;
-            document.getElementById('totalFrames').textContent = animationFrames.length;
-        }
-
-        function clearCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // Modal functions
         function showModal(modalId) {
             document.getElementById(modalId).classList.remove('hidden');
         }
@@ -427,196 +627,224 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
-        // UI update functions
-        function updateUIForLoginState() {
-            const loginRequired = document.getElementById('loginRequired');
-            const drawingTools = document.getElementById('drawingTools');
-            const drawModeBtn = document.getElementById('drawModeBtn');
-            const animModeBtn = document.getElementById('animModeBtn');
-            
-            if (currentUser) {
-                // User is logged in - show drawing tools
-                loginRequired.classList.add('hidden');
-                drawingTools.classList.remove('hidden');
-                drawModeBtn.disabled = false;
-                animModeBtn.disabled = false;
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (users[username] && users[username] === password) {
+                currentUser = { username, type: 'user' };
+                updateUserInterface();
+                hideModal('loginModal');
+                showNotification('Login successful!', 'success');
             } else {
-                // User is not logged in - show login required message
-                loginRequired.classList.remove('hidden');
-                drawingTools.classList.add('hidden');
-                drawModeBtn.disabled = true;
-                animModeBtn.disabled = true;
+                showNotification('Invalid credentials!', 'error');
             }
         }
 
-        // Authentication functions
-        function login(username, password) {
-            // Demo login - in real app, this would validate against a server
-            currentUser = username;
-            alert(`Welcome ${username}! You are now logged in.`);
-            hideModal('loginModal');
-            updateUIForLoginState();
-        }
+        function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
 
-        function register(username, email, password) {
-            // Demo registration - in real app, this would create account on server
-            alert(`Account created for ${username}! Please login.`);
-            hideModal('registerModal');
-        }
-
-        function devLogin(devName, devCode) {
-            if (developers[devName] === devCode) {
-                currentDeveloper = devName;
-                alert(`Developer ${devName} logged in successfully!`);
-                hideModal('devLoginModal');
-            } else {
-                alert('Invalid developer credentials!');
-            }
-        }
-
-        function reportPost(reason, details) {
-            if (currentDeveloper) {
-                alert(`Report received by ${currentDeveloper}:\nReason: ${reason}\nDetails: ${details}`);
-            } else {
-                alert('Report submitted successfully! Our team will review it.');
-            }
-            hideModal('reportModal');
-        }
-
-        function publishArt() {
-            if (!currentUser) {
-                alert('Please login to publish your artwork!');
+            if (users[username]) {
+                showNotification('Username already exists!', 'error');
                 return;
             }
-            
-            const artData = canvas.toDataURL();
-            alert('Artwork published to the community feed!');
-            
-            // Add to feed (demo)
-            const feedContainer = document.getElementById('feedContainer');
-            const newPost = document.createElement('div');
-            newPost.className = 'feed-post bg-gray-50 rounded-lg p-4 shadow-sm';
-            newPost.innerHTML = `
-                <div class="flex justify-between items-start mb-2">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">${currentUser[0].toUpperCase()}</div>
-                        <span class="font-semibold text-gray-800">${currentUser}</span>
-                    </div>
-                    <button class="report-btn text-red-500 hover:text-red-700 text-sm">⚠️ Report</button>
-                </div>
-                <img src="${artData}" class="w-full h-32 object-cover rounded-lg mb-2">
-                <p class="text-sm text-gray-600 mb-2">New ${currentMode} creation! 🎨</p>
-                <div class="flex items-center space-x-4 text-sm text-gray-500">
-                    <button class="hover:text-purple-500">❤️ 0</button>
-                    <button class="hover:text-blue-500">💬 0</button>
-                </div>
-            `;
-            feedContainer.insertBefore(newPost, feedContainer.firstChild);
+
+            users[username] = password;
+            currentUser = { username, email, type: 'user' };
+            updateUserInterface();
+            hideModal('registerModal');
+            showNotification('Registration successful!', 'success');
         }
 
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Canvas events
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
+        function handleDevLogin(e) {
+            e.preventDefault();
+            const devName = document.getElementById('devName').value;
+            const devCode = document.getElementById('devCode').value;
 
-            // Tool selection
-            document.querySelectorAll('.tool-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active-tool'));
-                    this.classList.add('active-tool');
-                    currentTool = this.dataset.tool;
-                });
-            });
+            if (developers[devName] && developers[devName] === devCode) {
+                currentUser = { username: devName, type: 'developer' };
+                
+                // Activate PorchXChing Service for developers
+                porchXChingService.activateService(currentUser);
+                
+                updateUserInterface();
+                hideModal('devLoginModal');
+                showNotification('Developer login successful!', 'success');
+                
+                // Show developer features
+                setTimeout(() => {
+                    showNotification('PorchXChing Premium Features Unlocked!', 'success');
+                }, 1500);
+            } else {
+                showNotification('Invalid developer credentials!', 'error');
+            }
+        }
 
-            // Mode switching
-            document.getElementById('drawModeBtn').addEventListener('click', () => {
-                if (currentUser) {
-                    switchMode('drawing');
+        function handleReport(e) {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                showNotification('Please login to report!', 'error');
+                return;
+            }
+
+            const reason = document.getElementById('reportReason').value;
+            const details = document.getElementById('reportDetails').value;
+
+            if (!reason) {
+                showNotification('Please select a reason!', 'error');
+                return;
+            }
+
+            // Send report to developers
+            const reportData = {
+                reason: reason,
+                details: details,
+                reporter: currentUser.username,
+                timestamp: new Date().toISOString(),
+                postId: Date.now() // Simple ID for demo
+            };
+
+            // Store report (in real app, this would go to a database)
+            if (!window.reports) window.reports = [];
+            window.reports.push(reportData);
+
+            // Notify developers if they're online
+            const devNotification = `🚨 New Report from ${currentUser.username}: ${reason}`;
+            console.log('Report sent to developers:', reportData);
+            
+            hideModal('reportModal');
+            showNotification('Report sent to developers successfully!', 'success');
+            
+            // Reset form
+            document.getElementById('reportForm').reset();
+        }
+
+        function logout() {
+            currentUser = null;
+            updateUserInterface();
+            showNotification('Logged out successfully!', 'success');
+        }
+
+        function updateUserInterface() {
+            const authButtons = document.getElementById('authButtons');
+            const userInfo = document.getElementById('userInfo');
+            const welcomeText = document.getElementById('welcomeText');
+            const serviceStatus = document.getElementById('serviceStatus');
+
+            if (currentUser) {
+                authButtons.classList.add('hidden');
+                userInfo.classList.remove('hidden');
+                const userType = currentUser.type === 'developer' ? '👨‍💻 Dev' : '👤';
+                welcomeText.textContent = `${userType} ${currentUser.username}`;
+                
+                // Show PorchXChing service status for developers
+                if (currentUser.type === 'developer' && porchXChingService.isActive) {
+                    serviceStatus.classList.remove('hidden');
                 } else {
-                    alert(currentLanguage === 'en' ? 'Please login to access drawing mode!' : 'กรุณาเข้าสู่ระบบเพื่อใช้โหมดวาดรูป!');
+                    serviceStatus.classList.add('hidden');
                 }
-            });
-            document.getElementById('animModeBtn').addEventListener('click', () => {
-                if (currentUser) {
-                    switchMode('animation');
-                } else {
-                    alert(currentLanguage === 'en' ? 'Please login to access animation mode!' : 'กรุณาเข้าสู่ระบบเพื่อใช้โหมดแอนิเมชัน!');
-                }
-            });
+            } else {
+                authButtons.classList.remove('hidden');
+                userInfo.classList.add('hidden');
+                serviceStatus.classList.add('hidden');
+                porchXChingService.isActive = false;
+            }
+        }
 
-            // Language switching
-            document.getElementById('languageSelect').addEventListener('change', function() {
-                switchLanguage(this.value);
-            });
+        function publishArtwork() {
+            if (!currentUser) {
+                showNotification('Please login to publish!', 'error');
+                return;
+            }
 
-            // Modal triggers
-            document.getElementById('loginBtn').addEventListener('click', () => showModal('loginModal'));
-            document.getElementById('registerBtn').addEventListener('click', () => showModal('registerModal'));
-            document.getElementById('devLoginBtn').addEventListener('click', () => showModal('devLoginModal'));
+            const canvas = document.getElementById('drawingCanvas');
+            const dataURL = canvas.toDataURL();
+            
+            // Create new post in feed
+            const feedContainer = document.getElementById('feedContainer');
+            const newPost = createFeedPost(currentUser.username, dataURL, 'New artwork!');
+            feedContainer.insertBefore(newPost, feedContainer.firstChild);
+            
+            showNotification('Artwork published!', 'success');
+        }
 
-            // Modal close buttons
-            document.getElementById('closeLoginModal').addEventListener('click', () => hideModal('loginModal'));
-            document.getElementById('closeRegisterModal').addEventListener('click', () => hideModal('registerModal'));
-            document.getElementById('closeDevLoginModal').addEventListener('click', () => hideModal('devLoginModal'));
-            document.getElementById('closeReportModal').addEventListener('click', () => hideModal('reportModal'));
+        function createFeedPost(username, imageData, description) {
+            const postDiv = document.createElement('div');
+            postDiv.className = 'feed-post bg-gray-50 rounded-lg p-4 shadow';
+            postDiv.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">${username[0].toUpperCase()}</div>
+                        <span class="font-semibold">${username}</span>
+                    </div>
+                    <button class="report-btn text-red-500 hover:text-red-700 text-sm">
+                        <span data-en="Report" data-th="รายงาน">Report</span>
+                    </button>
+                </div>
+                <img src="${imageData}" class="w-full h-32 object-cover rounded mb-2" alt="User artwork">
+                <p class="text-sm text-gray-600 mb-2">${description}</p>
+                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <button class="like-btn hover:text-red-500">❤️ 0</button>
+                    <button class="comment-btn hover:text-blue-500">💬 0</button>
+                </div>
+                <div class="comments-section mt-2 space-y-1"></div>
+                <div class="mt-2">
+                    <input type="text" placeholder="Add a comment..." class="comment-input w-full text-xs p-2 border rounded">
+                </div>
+            `;
+            
+            updateLanguage();
+            return postDiv;
+        }
 
-            // Form submissions
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const username = document.getElementById('loginUsername').value;
-                const password = document.getElementById('loginPassword').value;
-                login(username, password);
-            });
+        function addComment(input) {
+            if (!currentUser) {
+                showNotification('Please login to comment!', 'error');
+                return;
+            }
 
-            document.getElementById('registerForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const username = document.getElementById('regUsername').value;
-                const email = document.getElementById('regEmail').value;
-                const password = document.getElementById('regPassword').value;
-                register(username, email, password);
-            });
+            const comment = input.value.trim();
+            if (!comment) return;
 
-            document.getElementById('devLoginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const devName = document.getElementById('devName').value;
-                const devCode = document.getElementById('devCode').value;
-                devLogin(devName, devCode);
-            });
+            const commentsSection = input.parentElement.previousElementSibling;
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'text-xs text-gray-600 bg-gray-100 p-2 rounded';
+            commentDiv.innerHTML = `<strong>${currentUser.username}:</strong> ${comment}`;
+            commentsSection.appendChild(commentDiv);
 
-            document.getElementById('reportForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const reason = document.getElementById('reportReason').value;
-                const details = document.getElementById('reportDetails').value;
-                reportPost(reason, details);
-            });
+            input.value = '';
+        }
 
-            // Animation controls
-            document.getElementById('playBtn').addEventListener('click', playAnimation);
-            document.getElementById('pauseBtn').addEventListener('click', pauseAnimation);
-            document.getElementById('addFrameBtn').addEventListener('click', addFrame);
+        function toggleLike(button) {
+            if (!currentUser) {
+                showNotification('Please login to like!', 'error');
+                return;
+            }
 
-            // Other controls
-            document.getElementById('clearCanvas').addEventListener('click', clearCanvas);
-            document.getElementById('publishBtn').addEventListener('click', publishArt);
+            const currentLikes = parseInt(button.textContent.split(' ')[1]);
+            const newLikes = button.classList.contains('liked') ? currentLikes - 1 : currentLikes + 1;
+            button.textContent = `❤️ ${newLikes}`;
+            button.classList.toggle('liked');
+            button.classList.toggle('text-red-500');
+        }
 
-            // Canvas login buttons
-            document.getElementById('loginFromCanvas').addEventListener('click', () => showModal('loginModal'));
-            document.getElementById('registerFromCanvas').addEventListener('click', () => showModal('registerModal'));
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
 
-            // Report button delegation
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('report-btn')) {
-                    showModal('reportModal');
-                }
-            });
-
-            // Initialize
-            updateFrameDisplay();
-            updateUIForLoginState();
-        });
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96171a5d40277b41',t:'MTc1Mjg5NTQzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'961739f5148f14aa',t:'MTc1Mjg5NjczMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
