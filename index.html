@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShareDraw - Social Drawing Platform</title>
+    <title>SharedDraw - Creative Drawing & Animation Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .canvas-container {
@@ -12,56 +12,56 @@
             background: white;
         }
         .tool-btn {
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
         .tool-btn:hover {
-            transform: scale(1.05);
+            transform: translateY(-1px);
         }
         .active-tool {
             background: #3b82f6;
             color: white;
         }
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
+        .modal {
+            backdrop-filter: blur(4px);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .feed-post {
+            transition: transform 0.2s ease;
         }
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease-out;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
+        .feed-post:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen">
+<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg"></div>
-                    <h1 class="text-2xl font-bold text-gray-800">ShareDraw</h1>
+    <nav class="bg-white shadow-lg border-b-4 border-purple-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-purple-600">🎨 SharedDraw</h1>
+                    <div id="modeButtons" class="flex space-x-2">
+                        <button id="drawModeBtn" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            <span data-en="Drawing Mode" data-th="โหมดวาดรูป">Drawing Mode</span>
+                        </button>
+                        <button id="animModeBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            <span data-en="Animation Mode" data-th="โหมดแอนิเมชัน">Animation Mode</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <!-- Language Selector -->
-                    <div class="relative">
-                        <select id="languageSelector" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="en">🇺🇸 English</option>
-                            <option value="th">🇹🇭 ไทย</option>
-                        </select>
-                    </div>
-                    <button id="loginBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">Login</button>
-                    <button id="registerBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">Register</button>
-                    <button id="devLoginBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">Dev Login</button>
-                    <button id="logoutBtn" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors hidden">Logout</button>
+                    <select id="languageSelect" class="px-3 py-2 border border-gray-300 rounded-lg">
+                        <option value="en">English</option>
+                        <option value="th">ไทย</option>
+                    </select>
+                    <button id="loginBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                        <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
+                    </button>
+                    <button id="registerBtn" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+                        <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
+                    </button>
+                    <button id="devLoginBtn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                        <span data-en="Dev Login" data-th="เข้าสู่ระบบนักพัฒนา">Dev Login</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -69,95 +69,80 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Welcome Section -->
-        <div id="welcomeSection" class="mb-8">
-            <div class="text-center mb-8">
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">Welcome to ShareDraw</h2>
-                <p class="text-xl text-gray-600 mb-8">Share your drawings with the world!</p>
-            </div>
-            
-            <!-- Search Section -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <div class="flex flex-col md:flex-row gap-4 items-center">
-                    <input type="text" id="searchInput" placeholder="Search drawings by username..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button id="searchBtn" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">🔍 Search</button>
-                </div>
-            </div>
-            
-            <!-- Public Feed -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">🎨 Community Feed</h3>
-                <div id="publicFeed" class="space-y-4">
-                    <!-- Feed items will be loaded here -->
-                </div>
-                <div id="noDrawings" class="text-center text-gray-500 py-8 hidden">
-                    No drawings found. Be the first to share your artwork!
-                </div>
-            </div>
-            
-            <!-- Login Prompt for Non-Users -->
-            <div id="loginPrompt" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg p-6 mt-6 text-center">
-                <h3 class="text-xl font-semibold mb-4">Join ShareDraw Community!</h3>
-                <p class="mb-4">Login or register to create and share your own drawings</p>
-                <div class="space-x-4">
-                    <button onclick="showLogin()" class="bg-white text-blue-600 hover:bg-gray-100 py-2 px-6 rounded-lg transition-colors font-semibold">Login</button>
-                    <button onclick="showRegister()" class="bg-transparent border-2 border-white hover:bg-white hover:text-blue-600 py-2 px-6 rounded-lg transition-colors font-semibold">Register</button>
-                </div>
-            </div>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Drawing/Animation Area -->
+            <div class="lg:col-span-2">
+                <div id="drawingArea" class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 id="canvasTitle" class="text-xl font-bold text-gray-800">
+                            <span data-en="Drawing Canvas" data-th="พื้นที่วาดรูป">Drawing Canvas</span>
+                        </h2>
+                        <button id="publishBtn" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
+                            <span data-en="Publish" data-th="เผยแพร่">Publish</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Login Required Message (shown when not logged in) -->
+                    <div id="loginRequired" class="text-center py-16 bg-gray-50 rounded-lg">
+                        <div class="text-6xl mb-4">🔒</div>
+                        <h3 class="text-2xl font-bold text-gray-700 mb-4">
+                            <span data-en="Login Required" data-th="ต้องเข้าสู่ระบบ">Login Required</span>
+                        </h3>
+                        <p class="text-gray-600 mb-6">
+                            <span data-en="Please login to access drawing and animation tools" data-th="กรุณาเข้าสู่ระบบเพื่อใช้เครื่องมือวาดรูปและแอนิเมชัน">Please login to access drawing and animation tools</span>
+                        </p>
+                        <div class="space-x-4">
+                            <button id="loginFromCanvas" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                                <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
+                            </button>
+                            <button id="registerFromCanvas" class="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+                                <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
+                            </button>
+                        </div>
+                    </div>
 
-        <!-- Canvas Section (Hidden initially) -->
-        <div id="canvasSection" class="hidden">
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <div class="flex flex-wrap items-center justify-between mb-4">
-                    <h3 class="text-2xl font-bold text-gray-800">Drawing Canvas</h3>
-                    <div id="userInfo" class="text-sm text-gray-600"></div>
-                </div>
-                
-                <!-- Tools -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <button id="penTool" class="tool-btn active-tool px-4 py-2 rounded-lg border">✏️ Pen</button>
-                    <button id="brushTool" class="tool-btn px-4 py-2 rounded-lg border">🖌️ Brush</button>
-                    <button id="eraserTool" class="tool-btn px-4 py-2 rounded-lg border">🧹 Eraser</button>
-                    <button id="lineTool" class="tool-btn px-4 py-2 rounded-lg border">📏 Line</button>
-                    <button id="rectTool" class="tool-btn px-4 py-2 rounded-lg border">⬜ Rectangle</button>
-                    <button id="circleTool" class="tool-btn px-4 py-2 rounded-lg border">⭕ Circle</button>
-                    <input type="color" id="colorPicker" value="#000000" class="w-12 h-10 rounded border">
-                    <input type="range" id="brushSize" min="1" max="50" value="5" class="w-24">
-                    <button id="clearCanvas" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Clear</button>
-                    <button id="shareDrawing" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">📤 Share</button>
-                    <button id="animateBtn" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600">🎬 Animate</button>
-                </div>
+                    <!-- Drawing Tools (hidden when not logged in) -->
+                    <div id="drawingTools" class="hidden">
+                        <!-- Tools -->
+                        <div class="flex flex-wrap gap-2 mb-4 p-4 bg-gray-50 rounded-lg">
+                            <button class="tool-btn px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100" data-tool="pen">🖊️ Pen</button>
+                            <button class="tool-btn px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100" data-tool="brush">🖌️ Brush</button>
+                            <button class="tool-btn px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100" data-tool="eraser">🧹 Eraser</button>
+                            <input type="color" id="colorPicker" value="#000000" class="w-12 h-10 border border-gray-300 rounded-lg cursor-pointer">
+                            <input type="range" id="brushSize" min="1" max="20" value="3" class="w-20">
+                            <button id="clearCanvas" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                                <span data-en="Clear" data-th="ล้าง">Clear</span>
+                            </button>
+                        </div>
 
-                <!-- Canvas -->
-                <div class="canvas-container">
-                    <canvas id="drawingCanvas" width="800" height="600" class="block mx-auto cursor-crosshair"></canvas>
-                </div>
+                        <!-- Animation Controls (hidden by default) -->
+                        <div id="animationControls" class="hidden mb-4 p-4 bg-blue-50 rounded-lg">
+                            <div class="flex items-center space-x-4">
+                                <button id="playBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">▶️ Play</button>
+                                <button id="pauseBtn" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">⏸️ Pause</button>
+                                <button id="addFrameBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">+ Frame</button>
+                                <span class="text-sm text-gray-600">Frame: <span id="currentFrame">1</span>/<span id="totalFrames">1</span></span>
+                            </div>
+                        </div>
 
-                <!-- Animation Controls -->
-                <div id="animationControls" class="mt-4 hidden">
-                    <div class="flex items-center space-x-4">
-                        <button id="playAnimation" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">▶️ Play</button>
-                        <button id="pauseAnimation" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">⏸️ Pause</button>
-                        <button id="stopAnimation" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">⏹️ Stop</button>
-                        <span class="text-sm text-gray-600">Frame: <span id="frameCounter">1</span></span>
+                        <!-- Canvas -->
+                        <div class="canvas-container">
+                            <canvas id="drawingCanvas" width="600" height="400" class="w-full cursor-crosshair"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Developer Panel (Hidden initially) -->
-        <div id="devPanel" class="hidden">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">Developer Panel</h3>
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="text-lg font-semibold mb-3">Registered Users</h4>
-                        <div id="usersList" class="space-y-2 max-h-64 overflow-y-auto"></div>
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-semibold mb-3">Login Activity</h4>
-                        <div id="loginActivity" class="space-y-2 max-h-64 overflow-y-auto"></div>
+            <!-- Feed -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <span data-en="Community Feed" data-th="ฟีดชุมชน">Community Feed</span>
+                    </h2>
+                    <div id="feedContainer" class="space-y-4 max-h-96 overflow-y-auto">
+                        <div class="text-center text-gray-500 py-8">
+                            <p data-en="No posts yet. Be the first to share your artwork!" data-th="ยังไม่มีโพสต์ เป็นคนแรกที่แชร์ผลงานของคุณ!">No posts yet. Be the first to share your artwork!</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -165,92 +150,140 @@
     </div>
 
     <!-- Login Modal -->
-    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 fade-in">
-            <h3 class="text-2xl font-bold mb-6 text-center">Login</h3>
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
+            </h3>
             <form id="loginForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                    <input type="text" id="loginUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span data-en="Username" data-th="ชื่อผู้ใช้">Username</span>
+                    </label>
+                    <input type="text" id="loginUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span data-en="Password" data-th="รหัสผ่าน">Password</span>
+                    </label>
+                    <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                 </div>
                 <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors">Login</button>
-                    <button type="button" onclick="closeModal('loginModal')" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600 transition-colors">
+                        <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
+                    </button>
+                    <button type="button" id="closeLoginModal" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                        <span data-en="Cancel" data-th="ยกเลิก">Cancel</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Register Modal -->
-    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 fade-in">
-            <h3 class="text-2xl font-bold mb-6 text-center">Register</h3>
+    <div id="registerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
+            </h3>
             <form id="registerForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                    <input type="text" id="registerName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span data-en="Username" data-th="ชื่อผู้ใช้">Username</span>
+                    </label>
+                    <input type="text" id="regUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                    <input type="text" id="registerUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span data-en="Email" data-th="อีเมล">Email</span>
+                    </label>
+                    <input type="email" id="regEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="registerEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="registerPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span data-en="Password" data-th="รหัสผ่าน">Password</span>
+                    </label>
+                    <input type="password" id="regPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                 </div>
                 <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors">Register</button>
-                    <button type="button" onclick="closeModal('registerModal')" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                        <span data-en="Register" data-th="สมัครสมาชิก">Register</span>
+                    </button>
+                    <button type="button" id="closeRegisterModal" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                        <span data-en="Cancel" data-th="ยกเลิก">Cancel</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Developer Login Modal -->
-    <div id="devLoginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 fade-in">
-            <h3 class="text-2xl font-bold mb-6 text-center text-red-600">Developer Login</h3>
+    <div id="devLoginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                <span data-en="Developer Login" data-th="เข้าสู่ระบบนักพัฒนา">Developer Login</span>
+            </h3>
             <form id="devLoginForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Developer Name</label>
-                    <input type="text" id="devName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span data-en="Developer Name" data-th="ชื่อนักพัฒนา">Developer Name</span>
+                    </label>
+                    <select id="devName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <option value="">Select Developer</option>
+                        <option value="PorchPhaseXForever">PorchPhaseXForever</option>
+                        <option value="ChingDEV01">ChingDEV01</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Developer Code</label>
-                    <input type="password" id="devCode" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span data-en="Developer Code" data-th="รหัสนักพัฒนา">Developer Code</span>
+                    </label>
+                    <input type="password" id="devCode" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
                 </div>
                 <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors">Access Panel</button>
-                    <button type="button" onclick="closeModal('devLoginModal')" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
+                        <span data-en="Login" data-th="เข้าสู่ระบบ">Login</span>
+                    </button>
+                    <button type="button" id="closeDevLoginModal" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                        <span data-en="Cancel" data-th="ยกเลิก">Cancel</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Share Drawing Modal -->
-    <div id="shareModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 fade-in">
-            <h3 class="text-2xl font-bold mb-6 text-center text-green-600">Share Your Drawing</h3>
-            <form id="shareForm" class="space-y-4">
+    <!-- Report Modal -->
+    <div id="reportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                <span data-en="Report Post" data-th="รายงานโพสต์">Report Post</span>
+            </h3>
+            <form id="reportForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input type="text" id="drawingTitle" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required placeholder="Give your drawing a title...">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span data-en="Reason" data-th="เหตุผล">Reason</span>
+                    </label>
+                    <select id="reportReason" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <option value="inappropriate">Inappropriate Content</option>
+                        <option value="spam">Spam</option>
+                        <option value="harassment">Harassment</option>
+                        <option value="copyright">Copyright Violation</option>
+                        <option value="other">Other</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
-                    <textarea id="drawingDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 h-20" placeholder="Describe your artwork..."></textarea>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <span data-en="Additional Details" data-th="รายละเอียดเพิ่มเติม">Additional Details</span>
+                    </label>
+                    <textarea id="reportDetails" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"></textarea>
                 </div>
                 <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors">📤 Share</button>
-                    <button type="button" onclick="closeModal('shareModal')" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
+                        <span data-en="Submit Report" data-th="ส่งรายงาน">Submit Report</span>
+                    </button>
+                    <button type="button" id="closeReportModal" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                        <span data-en="Cancel" data-th="ยกเลิก">Cancel</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -258,386 +291,55 @@
 
     <script>
         // Global variables
-        let currentUser = null;
-        let isDeveloper = false;
-        let canvas, ctx;
-        let isDrawing = false;
+        let currentMode = 'drawing';
         let currentTool = 'pen';
-        let currentColor = '#000000';
-        let currentSize = 5;
-        let animationFrames = [];
-        let currentFrame = 0;
-        let isAnimating = false;
-        let animationInterval;
+        let isDrawing = false;
+        let currentUser = null;
+        let currentDeveloper = null;
         let currentLanguage = 'en';
+        let animationFrames = [[]];
+        let currentFrame = 0;
+        let isPlaying = false;
 
-        // Language translations
-        const translations = {
-            en: {
-                title: "ShareDraw",
-                subtitle: "Share your drawings with the world!",
-                login: "Login",
-                register: "Register",
-                devLogin: "Dev Login",
-                logout: "Logout",
-                welcome: "Welcome to ShareDraw",
-                loginPrompt: "Join ShareDraw Community!",
-                loginPromptDesc: "Login or register to create and share your own drawings",
-                username: "Username",
-                password: "Password",
-                fullName: "Full Name",
-                email: "Email",
-                cancel: "Cancel",
-                drawingCanvas: "Drawing Canvas",
-                pen: "✏️ Pen",
-                brush: "🖌️ Brush",
-                eraser: "🧹 Eraser",
-                line: "📏 Line",
-                rectangle: "⬜ Rectangle",
-                circle: "⭕ Circle",
-                clear: "Clear",
-                share: "📤 Share",
-                animate: "🎬 Animate",
-                play: "▶️ Play",
-                pause: "⏸️ Pause",
-                stop: "⏹️ Stop",
-                frame: "Frame",
-                search: "🔍 Search",
-                searchPlaceholder: "Search drawings by username...",
-                communityFeed: "🎨 Community Feed",
-                noDrawings: "No drawings found. Be the first to share your artwork!",
-                shareDrawing: "Share Your Drawing",
-                title: "Title",
-                titlePlaceholder: "Give your drawing a title...",
-                description: "Description (Optional)",
-                descriptionPlaceholder: "Describe your artwork...",
-                devPanel: "Developer Panel",
-                registeredUsers: "Registered Users",
-                loginActivity: "Login Activity",
-                devLoginTitle: "Developer Login",
-                devName: "Developer Name",
-                devCode: "Developer Code",
-                accessPanel: "Access Panel",
-                loginSuccess: "Login successful!",
-                registerSuccess: "Registration successful!",
-                devAccessGranted: "Developer access granted!",
-                logoutSuccess: "Logged out successfully!",
-                invalidCredentials: "Invalid credentials!",
-                usernameExists: "Username already exists!",
-                invalidDevCredentials: "Invalid developer credentials!",
-                frameCaptured: "Frame captured! Draw next frame or play animation.",
-                noFrames: "No frames to animate!",
-                drawingShared: "Drawing shared successfully!",
-                emptyCanvas: "Please draw something before sharing!",
-                registered: "Registered",
-                sharedBy: "by",
-                timeAgo: "ago"
-            },
-            th: {
-                title: "ShareDraw",
-                subtitle: "แบ่งปันผลงานของคุณกับโลก!",
-                login: "เข้าสู่ระบบ",
-                register: "สมัครสมาชิก",
-                devLogin: "เข้าสู่ระบบนักพัฒนา",
-                logout: "ออกจากระบบ",
-                welcome: "ยินดีต้อนรับสู่ ShareDraw",
-                loginPrompt: "เข้าร่วมชุมชน ShareDraw!",
-                loginPromptDesc: "เข้าสู่ระบบหรือสมัครสมาชิกเพื่อสร้างและแบ่งปันผลงานของคุณ",
-                username: "ชื่อผู้ใช้",
-                password: "รหัสผ่าน",
-                fullName: "ชื่อ-นามสกุล",
-                email: "อีเมล",
-                cancel: "ยกเลิก",
-                drawingCanvas: "พื้นที่วาดรูป",
-                pen: "✏️ ปากกา",
-                brush: "🖌️ พู่กัน",
-                eraser: "🧹 ยางลบ",
-                line: "📏 เส้นตรง",
-                rectangle: "⬜ สี่เหลี่ยม",
-                circle: "⭕ วงกลม",
-                clear: "ล้างหน้าจอ",
-                share: "📤 แบ่งปัน",
-                animate: "🎬 แอนิเมชั่น",
-                play: "▶️ เล่น",
-                pause: "⏸️ หยุดชั่วคราว",
-                stop: "⏹️ หยุด",
-                frame: "เฟรม",
-                search: "🔍 ค้นหา",
-                searchPlaceholder: "ค้นหาผลงานโดยชื่อผู้ใช้...",
-                communityFeed: "🎨 ฟีดชุมชน",
-                noDrawings: "ไม่พบผลงาน เป็นคนแรกที่แบ่งปันผลงานศิลปะของคุณ!",
-                shareDrawing: "แบ่งปันผลงานของคุณ",
-                title: "หัวข้อ",
-                titlePlaceholder: "ตั้งชื่อผลงานของคุณ...",
-                description: "คำอธิบาย (ไม่บังคับ)",
-                descriptionPlaceholder: "อธิบายผลงานของคุณ...",
-                devPanel: "แผงควบคุมนักพัฒนา",
-                registeredUsers: "สมาชิกที่ลงทะเบียน",
-                loginActivity: "กิจกรรมการเข้าสู่ระบบ",
-                devLoginTitle: "เข้าสู่ระบบนักพัฒนา",
-                devName: "ชื่อนักพัฒนา",
-                devCode: "รหัสนักพัฒนา",
-                accessPanel: "เข้าสู่แผงควบคุม",
-                loginSuccess: "เข้าสู่ระบบสำเร็จ!",
-                registerSuccess: "สมัครสมาชิกสำเร็จ!",
-                devAccessGranted: "อนุญาตให้เข้าถึงระบบนักพัฒนา!",
-                logoutSuccess: "ออกจากระบบสำเร็จ!",
-                invalidCredentials: "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง!",
-                usernameExists: "ชื่อผู้ใช้นี้มีอยู่แล้ว!",
-                invalidDevCredentials: "ข้อมูลนักพัฒนาไม่ถูกต้อง!",
-                frameCaptured: "บันทึกเฟรมแล้ว! วาดเฟรมถัดไปหรือเล่นแอนิเมชั่น",
-                noFrames: "ไม่มีเฟรมสำหรับแอนิเมชั่น!",
-                drawingShared: "แบ่งปันผลงานสำเร็จ!",
-                emptyCanvas: "กรุณาวาดรูปก่อนแบ่งปัน!",
-                registered: "ลงทะเบียนเมื่อ",
-                sharedBy: "โดย",
-                timeAgo: "ที่แล้ว"
-            }
-        };
+        // Canvas setup
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
         // Developer credentials
         const developers = {
             'PorchPhaseXForever': 'imadmin01',
-            'ChingDev123': 'imadmin02'
+            'ChingDEV01': 'imadmin02'
         };
 
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCanvas();
-            setupEventListeners();
-            loadStoredData();
-            loadPublicFeed();
-        });
-
-        function initializeCanvas() {
-            canvas = document.getElementById('drawingCanvas');
-            ctx = canvas.getContext('2d');
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
+        // Language switching
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('[data-en]').forEach(element => {
+                const text = element.getAttribute(`data-${lang}`);
+                if (text) {
+                    element.textContent = text;
+                }
+            });
         }
 
-        function setupEventListeners() {
-            // Language selector
-            document.getElementById('languageSelector').addEventListener('change', function(e) {
-                currentLanguage = e.target.value;
-                localStorage.setItem('language', currentLanguage);
-                updateLanguage();
-            });
-
-            // Modal buttons
-            document.getElementById('loginBtn').addEventListener('click', () => showModal('loginModal'));
-            document.getElementById('registerBtn').addEventListener('click', () => showModal('registerModal'));
-            document.getElementById('devLoginBtn').addEventListener('click', () => showModal('devLoginModal'));
-            document.getElementById('logoutBtn').addEventListener('click', logout);
-
-            // Forms
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('registerForm').addEventListener('submit', handleRegister);
-            document.getElementById('devLoginForm').addEventListener('submit', handleDevLogin);
-
-            // Canvas events
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
-
-            // Tool buttons
-            document.querySelectorAll('.tool-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active-tool'));
-                    this.classList.add('active-tool');
-                    currentTool = this.id.replace('Tool', '');
-                });
-            });
-
-            // Controls
-            document.getElementById('colorPicker').addEventListener('change', (e) => currentColor = e.target.value);
-            document.getElementById('brushSize').addEventListener('input', (e) => currentSize = e.target.value);
-            document.getElementById('clearCanvas').addEventListener('click', clearCanvas);
-            document.getElementById('shareDrawing').addEventListener('click', () => showModal('shareModal'));
-            document.getElementById('animateBtn').addEventListener('click', toggleAnimation);
-            document.getElementById('playAnimation').addEventListener('click', playAnimation);
-            document.getElementById('pauseAnimation').addEventListener('click', pauseAnimation);
-            document.getElementById('stopAnimation').addEventListener('click', stopAnimation);
+        // Mode switching
+        function switchMode(mode) {
+            currentMode = mode;
+            const animControls = document.getElementById('animationControls');
+            const canvasTitle = document.getElementById('canvasTitle');
             
-            // Search and feed
-            document.getElementById('searchBtn').addEventListener('click', performSearch);
-            document.getElementById('searchInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') performSearch();
-            });
-            document.getElementById('shareForm').addEventListener('submit', handleShare);
-        }
-
-        function showModal(modalId) {
-            document.getElementById(modalId).classList.remove('hidden');
-            document.getElementById(modalId).classList.add('flex');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            document.getElementById(modalId).classList.remove('flex');
-        }
-
-        function showLogin() {
-            showModal('loginModal');
-        }
-
-        function showRegister() {
-            showModal('registerModal');
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const user = users.find(u => u.username === username && u.password === password);
-
-            if (user) {
-                currentUser = user;
-                loginSuccess();
-                logActivity(`User ${username} logged in`);
-                showNotification(translations[currentLanguage].loginSuccess, 'success');
-                closeModal('loginModal');
+            if (mode === 'animation') {
+                animControls.classList.remove('hidden');
+                canvasTitle.querySelector('span').textContent = currentLanguage === 'en' ? 'Animation Canvas' : 'พื้นที่แอนิเมชัน';
             } else {
-                showNotification(translations[currentLanguage].invalidCredentials, 'error');
+                animControls.classList.add('hidden');
+                canvasTitle.querySelector('span').textContent = currentLanguage === 'en' ? 'Drawing Canvas' : 'พื้นที่วาดรูป';
             }
         }
 
-        function handleRegister(e) {
-            e.preventDefault();
-            const name = document.getElementById('registerName').value;
-            const username = document.getElementById('registerUsername').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            
-            if (users.find(u => u.username === username)) {
-                showNotification(translations[currentLanguage].usernameExists, 'error');
-                return;
-            }
-
-            const newUser = {
-                id: Date.now(),
-                name,
-                username,
-                email,
-                password,
-                registeredAt: new Date().toISOString()
-            };
-
-            users.push(newUser);
-            localStorage.setItem('users', JSON.stringify(users));
-            
-            currentUser = newUser;
-            loginSuccess();
-            logActivity(`New user ${username} registered and logged in`);
-            showNotification(translations[currentLanguage].registerSuccess, 'success');
-            closeModal('registerModal');
-        }
-
-        function handleDevLogin(e) {
-            e.preventDefault();
-            const devName = document.getElementById('devName').value;
-            const devCode = document.getElementById('devCode').value;
-
-            if (developers[devName] === devCode) {
-                isDeveloper = true;
-                currentUser = { name: devName, username: devName, isDev: true };
-                devLoginSuccess();
-                logActivity(`Developer ${devName} accessed admin panel`);
-                showNotification(translations[currentLanguage].devAccessGranted, 'success');
-                closeModal('devLoginModal');
-            } else {
-                showNotification(translations[currentLanguage].invalidDevCredentials, 'error');
-            }
-        }
-
-        function loginSuccess() {
-            document.getElementById('welcomeSection').classList.add('hidden');
-            document.getElementById('canvasSection').classList.remove('hidden');
-            document.getElementById('userInfo').textContent = `Welcome, ${currentUser.name}!`;
-            document.getElementById('loginBtn').classList.add('hidden');
-            document.getElementById('registerBtn').classList.add('hidden');
-            document.getElementById('devLoginBtn').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.remove('hidden');
-        }
-
-        function devLoginSuccess() {
-            document.getElementById('welcomeSection').classList.add('hidden');
-            document.getElementById('canvasSection').classList.add('hidden');
-            document.getElementById('devPanel').classList.remove('hidden');
-            document.getElementById('loginBtn').classList.add('hidden');
-            document.getElementById('registerBtn').classList.add('hidden');
-            document.getElementById('devLoginBtn').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.remove('hidden');
-            loadDevPanel();
-        }
-
-        function logout() {
-            currentUser = null;
-            isDeveloper = false;
-            document.getElementById('welcomeSection').classList.remove('hidden');
-            document.getElementById('canvasSection').classList.add('hidden');
-            document.getElementById('devPanel').classList.add('hidden');
-            document.getElementById('loginBtn').classList.remove('hidden');
-            document.getElementById('registerBtn').classList.remove('hidden');
-            document.getElementById('devLoginBtn').classList.remove('hidden');
-            document.getElementById('logoutBtn').classList.add('hidden');
-            showNotification(translations[currentLanguage].logoutSuccess, 'success');
-        }
-
-        function loadDevPanel() {
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const activities = JSON.parse(localStorage.getItem('activities') || '[]');
-
-            const usersList = document.getElementById('usersList');
-            usersList.innerHTML = users.map(user => `
-                <div class="bg-gray-50 p-3 rounded border">
-                    <div class="font-medium">${user.name} (@${user.username})</div>
-                    <div class="text-sm text-gray-600">${user.email}</div>
-                    <div class="text-xs text-gray-500">Registered: ${new Date(user.registeredAt).toLocaleDateString()}</div>
-                </div>
-            `).join('');
-
-            const loginActivity = document.getElementById('loginActivity');
-            loginActivity.innerHTML = activities.slice(-10).reverse().map(activity => `
-                <div class="bg-gray-50 p-3 rounded border">
-                    <div class="text-sm">${activity.message}</div>
-                    <div class="text-xs text-gray-500">${new Date(activity.timestamp).toLocaleString()}</div>
-                </div>
-            `).join('');
-        }
-
-        function logActivity(message) {
-            const activities = JSON.parse(localStorage.getItem('activities') || '[]');
-            activities.push({
-                message,
-                timestamp: new Date().toISOString(),
-                user: currentUser?.username || 'Unknown'
-            });
-            localStorage.setItem('activities', JSON.stringify(activities));
-            
-            // Simulate email notification (Demo only)
-            console.log(`Email notification sent to porchdevyt@gmail.com: ${message}`);
-        }
-
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `notification px-6 py-4 rounded-lg shadow-lg text-white ${
-                type === 'success' ? 'bg-green-500' : 'bg-red-500'
-            }`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Canvas drawing functions
+        // Drawing functions
         function startDrawing(e) {
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
@@ -655,287 +357,266 @@
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             
+            ctx.lineWidth = document.getElementById('brushSize').value;
+            ctx.strokeStyle = currentTool === 'eraser' ? '#FFFFFF' : document.getElementById('colorPicker').value;
             ctx.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
-            ctx.strokeStyle = currentColor;
-            ctx.lineWidth = currentSize;
             
             ctx.lineTo(x, y);
             ctx.stroke();
         }
 
         function stopDrawing() {
-            isDrawing = false;
-            ctx.beginPath();
+            if (isDrawing) {
+                isDrawing = false;
+                ctx.beginPath();
+                
+                // Save frame for animation mode
+                if (currentMode === 'animation') {
+                    animationFrames[currentFrame] = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                }
+            }
+        }
+
+        // Animation functions
+        function addFrame() {
+            animationFrames.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            currentFrame = animationFrames.length - 1;
+            updateFrameDisplay();
+            clearCanvas();
+        }
+
+        function playAnimation() {
+            if (isPlaying) return;
+            isPlaying = true;
+            let frameIndex = 0;
+            
+            const interval = setInterval(() => {
+                if (!isPlaying) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (animationFrames[frameIndex]) {
+                    ctx.putImageData(animationFrames[frameIndex], 0, 0);
+                }
+                
+                frameIndex = (frameIndex + 1) % animationFrames.length;
+            }, 200);
+        }
+
+        function pauseAnimation() {
+            isPlaying = false;
+        }
+
+        function updateFrameDisplay() {
+            document.getElementById('currentFrame').textContent = currentFrame + 1;
+            document.getElementById('totalFrames').textContent = animationFrames.length;
         }
 
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        function toggleAnimation() {
-            const controls = document.getElementById('animationControls');
-            controls.classList.toggle('hidden');
+        // Modal functions
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // UI update functions
+        function updateUIForLoginState() {
+            const loginRequired = document.getElementById('loginRequired');
+            const drawingTools = document.getElementById('drawingTools');
+            const drawModeBtn = document.getElementById('drawModeBtn');
+            const animModeBtn = document.getElementById('animModeBtn');
             
-            if (!controls.classList.contains('hidden')) {
-                // Save current frame
-                animationFrames.push(canvas.toDataURL());
-                showNotification(translations[currentLanguage].frameCaptured, 'success');
+            if (currentUser) {
+                // User is logged in - show drawing tools
+                loginRequired.classList.add('hidden');
+                drawingTools.classList.remove('hidden');
+                drawModeBtn.disabled = false;
+                animModeBtn.disabled = false;
+            } else {
+                // User is not logged in - show login required message
+                loginRequired.classList.remove('hidden');
+                drawingTools.classList.add('hidden');
+                drawModeBtn.disabled = true;
+                animModeBtn.disabled = true;
             }
         }
 
-        function playAnimation() {
-            if (animationFrames.length === 0) {
-                showNotification(translations[currentLanguage].noFrames, 'error');
-                return;
+        // Authentication functions
+        function login(username, password) {
+            // Demo login - in real app, this would validate against a server
+            currentUser = username;
+            alert(`Welcome ${username}! You are now logged in.`);
+            hideModal('loginModal');
+            updateUIForLoginState();
+        }
+
+        function register(username, email, password) {
+            // Demo registration - in real app, this would create account on server
+            alert(`Account created for ${username}! Please login.`);
+            hideModal('registerModal');
+        }
+
+        function devLogin(devName, devCode) {
+            if (developers[devName] === devCode) {
+                currentDeveloper = devName;
+                alert(`Developer ${devName} logged in successfully!`);
+                hideModal('devLoginModal');
+            } else {
+                alert('Invalid developer credentials!');
             }
-            
-            isAnimating = true;
-            currentFrame = 0;
-            
-            animationInterval = setInterval(() => {
-                const img = new Image();
-                img.onload = () => {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 0, 0);
-                };
-                img.src = animationFrames[currentFrame];
-                
-                document.getElementById('frameCounter').textContent = currentFrame + 1;
-                currentFrame = (currentFrame + 1) % animationFrames.length;
-            }, 500);
         }
 
-        function pauseAnimation() {
-            clearInterval(animationInterval);
-            isAnimating = false;
-        }
-
-        function stopAnimation() {
-            clearInterval(animationInterval);
-            isAnimating = false;
-            currentFrame = 0;
-            document.getElementById('frameCounter').textContent = '1';
-        }
-
-        function updateLanguage() {
-            const t = translations[currentLanguage];
-            
-            // Update navigation
-            document.querySelector('h1').textContent = t.title;
-            document.getElementById('loginBtn').textContent = t.login;
-            document.getElementById('registerBtn').textContent = t.register;
-            document.getElementById('devLoginBtn').textContent = t.devLogin;
-            document.getElementById('logoutBtn').textContent = t.logout;
-            
-            // Update welcome section
-            document.querySelector('#welcomeSection h2').textContent = t.welcome;
-            document.querySelector('#welcomeSection p').textContent = t.subtitle;
-            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
-            document.getElementById('searchBtn').innerHTML = t.search;
-            document.querySelector('#publicFeed').previousElementSibling.textContent = t.communityFeed;
-            document.getElementById('noDrawings').textContent = t.noDrawings;
-            document.querySelector('#loginPrompt h3').textContent = t.loginPrompt;
-            document.querySelector('#loginPrompt p').textContent = t.loginPromptDesc;
-            document.querySelector('#loginPrompt button:first-of-type').textContent = t.login;
-            document.querySelector('#loginPrompt button:last-of-type').textContent = t.register;
-            
-            // Update canvas section
-            if (document.querySelector('#canvasSection h3')) {
-                document.querySelector('#canvasSection h3').textContent = t.drawingCanvas;
+        function reportPost(reason, details) {
+            if (currentDeveloper) {
+                alert(`Report received by ${currentDeveloper}:\nReason: ${reason}\nDetails: ${details}`);
+            } else {
+                alert('Report submitted successfully! Our team will review it.');
             }
-            
-            // Update tool buttons
-            document.getElementById('penTool').innerHTML = t.pen;
-            document.getElementById('brushTool').innerHTML = t.brush;
-            document.getElementById('eraserTool').innerHTML = t.eraser;
-            document.getElementById('lineTool').innerHTML = t.line;
-            document.getElementById('rectTool').innerHTML = t.rectangle;
-            document.getElementById('circleTool').innerHTML = t.circle;
-            document.getElementById('clearCanvas').textContent = t.clear;
-            document.getElementById('shareDrawing').innerHTML = t.share;
-            document.getElementById('animateBtn').innerHTML = t.animate;
-            
-            // Update animation controls
-            document.getElementById('playAnimation').innerHTML = t.play;
-            document.getElementById('pauseAnimation').innerHTML = t.pause;
-            document.getElementById('stopAnimation').innerHTML = t.stop;
-            
-            // Update modals
-            updateModalLanguage();
-            
-            // Update dev panel if visible
-            if (!document.getElementById('devPanel').classList.contains('hidden')) {
-                updateDevPanelLanguage();
-            }
-            
-            // Reload feed to update language
-            loadPublicFeed();
-        }
-        
-        function updateModalLanguage() {
-            const t = translations[currentLanguage];
-            
-            // Login modal
-            document.querySelector('#loginModal h3').textContent = t.login;
-            document.querySelector('#loginModal label:nth-of-type(1)').textContent = t.username;
-            document.querySelector('#loginModal label:nth-of-type(2)').textContent = t.password;
-            document.querySelector('#loginModal button[type="submit"]').textContent = t.login;
-            document.querySelector('#loginModal button[type="button"]').textContent = t.cancel;
-            
-            // Register modal
-            document.querySelector('#registerModal h3').textContent = t.register;
-            document.querySelector('#registerModal label:nth-of-type(1)').textContent = t.fullName;
-            document.querySelector('#registerModal label:nth-of-type(2)').textContent = t.username;
-            document.querySelector('#registerModal label:nth-of-type(3)').textContent = t.email;
-            document.querySelector('#registerModal label:nth-of-type(4)').textContent = t.password;
-            document.querySelector('#registerModal button[type="submit"]').textContent = t.register;
-            document.querySelector('#registerModal button[type="button"]').textContent = t.cancel;
-            
-            // Dev login modal
-            document.querySelector('#devLoginModal h3').textContent = t.devLoginTitle;
-            document.querySelector('#devLoginModal label:nth-of-type(1)').textContent = t.devName;
-            document.querySelector('#devLoginModal label:nth-of-type(2)').textContent = t.devCode;
-            document.querySelector('#devLoginModal button[type="submit"]').textContent = t.accessPanel;
-            document.querySelector('#devLoginModal button[type="button"]').textContent = t.cancel;
-            
-            // Share modal
-            document.querySelector('#shareModal h3').textContent = t.shareDrawing;
-            document.querySelector('#shareModal label:nth-of-type(1)').textContent = t.title;
-            document.querySelector('#shareModal label:nth-of-type(2)').textContent = t.description;
-            document.getElementById('drawingTitle').placeholder = t.titlePlaceholder;
-            document.getElementById('drawingDescription').placeholder = t.descriptionPlaceholder;
-            document.querySelector('#shareModal button[type="submit"]').innerHTML = t.share;
-            document.querySelector('#shareModal button[type="button"]').textContent = t.cancel;
-        }
-        
-        function updateDevPanelLanguage() {
-            const t = translations[currentLanguage];
-            document.querySelector('#devPanel h3').textContent = t.devPanel;
-            document.querySelector('#devPanel h4:nth-of-type(1)').textContent = t.registeredUsers;
-            document.querySelector('#devPanel h4:nth-of-type(2)').textContent = t.loginActivity;
+            hideModal('reportModal');
         }
 
-        function handleShare(e) {
-            e.preventDefault();
-            
+        function publishArt() {
             if (!currentUser) {
-                showNotification('Please login to share drawings!', 'error');
+                alert('Please login to publish your artwork!');
                 return;
             }
             
-            // Check if canvas is empty
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const isEmpty = imageData.data.every(pixel => pixel === 0);
+            const artData = canvas.toDataURL();
+            alert('Artwork published to the community feed!');
             
-            if (isEmpty) {
-                showNotification(translations[currentLanguage].emptyCanvas, 'error');
-                return;
-            }
-            
-            const title = document.getElementById('drawingTitle').value;
-            const description = document.getElementById('drawingDescription').value;
-            const drawingData = canvas.toDataURL();
-            
-            const drawing = {
-                id: Date.now(),
-                title,
-                description,
-                imageData: drawingData,
-                author: currentUser.username,
-                authorName: currentUser.name,
-                createdAt: new Date().toISOString()
-            };
-            
-            const drawings = JSON.parse(localStorage.getItem('drawings') || '[]');
-            drawings.unshift(drawing);
-            localStorage.setItem('drawings', JSON.stringify(drawings));
-            
-            showNotification(translations[currentLanguage].drawingShared, 'success');
-            closeModal('shareModal');
-            document.getElementById('shareForm').reset();
-            loadPublicFeed();
-        }
-        
-        function performSearch() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-            const drawings = JSON.parse(localStorage.getItem('drawings') || '[]');
-            
-            let filteredDrawings = drawings;
-            if (searchTerm) {
-                filteredDrawings = drawings.filter(drawing => 
-                    drawing.author.toLowerCase().includes(searchTerm) ||
-                    drawing.authorName.toLowerCase().includes(searchTerm) ||
-                    drawing.title.toLowerCase().includes(searchTerm)
-                );
-            }
-            
-            displayDrawings(filteredDrawings);
-        }
-        
-        function loadPublicFeed() {
-            const drawings = JSON.parse(localStorage.getItem('drawings') || '[]');
-            displayDrawings(drawings);
-        }
-        
-        function displayDrawings(drawings) {
-            const feedContainer = document.getElementById('publicFeed');
-            const noDrawingsMsg = document.getElementById('noDrawings');
-            
-            if (drawings.length === 0) {
-                feedContainer.innerHTML = '';
-                noDrawingsMsg.classList.remove('hidden');
-                return;
-            }
-            
-            noDrawingsMsg.classList.add('hidden');
-            feedContainer.innerHTML = drawings.map(drawing => `
-                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <div class="flex items-center justify-between mb-3">
-                        <div>
-                            <h4 class="font-semibold text-lg">${drawing.title}</h4>
-                            <p class="text-sm text-gray-600">${translations[currentLanguage].sharedBy} ${drawing.authorName} (@${drawing.author})</p>
-                        </div>
-                        <span class="text-xs text-gray-500">${formatTimeAgo(drawing.createdAt)}</span>
+            // Add to feed (demo)
+            const feedContainer = document.getElementById('feedContainer');
+            const newPost = document.createElement('div');
+            newPost.className = 'feed-post bg-gray-50 rounded-lg p-4 shadow-sm';
+            newPost.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">${currentUser[0].toUpperCase()}</div>
+                        <span class="font-semibold text-gray-800">${currentUser}</span>
                     </div>
-                    ${drawing.description ? `<p class="text-gray-700 mb-3">${drawing.description}</p>` : ''}
-                    <div class="bg-white rounded border p-2">
-                        <img src="${drawing.imageData}" alt="${drawing.title}" class="max-w-full h-auto rounded" style="max-height: 300px; margin: 0 auto; display: block;">
-                    </div>
+                    <button class="report-btn text-red-500 hover:text-red-700 text-sm">⚠️ Report</button>
                 </div>
-            `).join('');
-        }
-        
-        function formatTimeAgo(dateString) {
-            const now = new Date();
-            const date = new Date(dateString);
-            const diffInSeconds = Math.floor((now - date) / 1000);
-            
-            if (diffInSeconds < 60) return `${diffInSeconds}s ${translations[currentLanguage].timeAgo}`;
-            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ${translations[currentLanguage].timeAgo}`;
-            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ${translations[currentLanguage].timeAgo}`;
-            return `${Math.floor(diffInSeconds / 86400)}d ${translations[currentLanguage].timeAgo}`;
+                <img src="${artData}" class="w-full h-32 object-cover rounded-lg mb-2">
+                <p class="text-sm text-gray-600 mb-2">New ${currentMode} creation! 🎨</p>
+                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <button class="hover:text-purple-500">❤️ 0</button>
+                    <button class="hover:text-blue-500">💬 0</button>
+                </div>
+            `;
+            feedContainer.insertBefore(newPost, feedContainer.firstChild);
         }
 
-        function loadStoredData() {
-            // Initialize with sample data if none exists
-            if (!localStorage.getItem('users')) {
-                localStorage.setItem('users', JSON.stringify([]));
-            }
-            if (!localStorage.getItem('activities')) {
-                localStorage.setItem('activities', JSON.stringify([]));
-            }
-            if (!localStorage.getItem('drawings')) {
-                localStorage.setItem('drawings', JSON.stringify([]));
-            }
-            
-            // Load saved language preference
-            const savedLanguage = localStorage.getItem('language');
-            if (savedLanguage) {
-                currentLanguage = savedLanguage;
-                document.getElementById('languageSelector').value = savedLanguage;
-                updateLanguage();
-            }
-        }
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Canvas events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // Tool selection
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active-tool'));
+                    this.classList.add('active-tool');
+                    currentTool = this.dataset.tool;
+                });
+            });
+
+            // Mode switching
+            document.getElementById('drawModeBtn').addEventListener('click', () => {
+                if (currentUser) {
+                    switchMode('drawing');
+                } else {
+                    alert(currentLanguage === 'en' ? 'Please login to access drawing mode!' : 'กรุณาเข้าสู่ระบบเพื่อใช้โหมดวาดรูป!');
+                }
+            });
+            document.getElementById('animModeBtn').addEventListener('click', () => {
+                if (currentUser) {
+                    switchMode('animation');
+                } else {
+                    alert(currentLanguage === 'en' ? 'Please login to access animation mode!' : 'กรุณาเข้าสู่ระบบเพื่อใช้โหมดแอนิเมชัน!');
+                }
+            });
+
+            // Language switching
+            document.getElementById('languageSelect').addEventListener('change', function() {
+                switchLanguage(this.value);
+            });
+
+            // Modal triggers
+            document.getElementById('loginBtn').addEventListener('click', () => showModal('loginModal'));
+            document.getElementById('registerBtn').addEventListener('click', () => showModal('registerModal'));
+            document.getElementById('devLoginBtn').addEventListener('click', () => showModal('devLoginModal'));
+
+            // Modal close buttons
+            document.getElementById('closeLoginModal').addEventListener('click', () => hideModal('loginModal'));
+            document.getElementById('closeRegisterModal').addEventListener('click', () => hideModal('registerModal'));
+            document.getElementById('closeDevLoginModal').addEventListener('click', () => hideModal('devLoginModal'));
+            document.getElementById('closeReportModal').addEventListener('click', () => hideModal('reportModal'));
+
+            // Form submissions
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+                login(username, password);
+            });
+
+            document.getElementById('registerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('regUsername').value;
+                const email = document.getElementById('regEmail').value;
+                const password = document.getElementById('regPassword').value;
+                register(username, email, password);
+            });
+
+            document.getElementById('devLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const devName = document.getElementById('devName').value;
+                const devCode = document.getElementById('devCode').value;
+                devLogin(devName, devCode);
+            });
+
+            document.getElementById('reportForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const reason = document.getElementById('reportReason').value;
+                const details = document.getElementById('reportDetails').value;
+                reportPost(reason, details);
+            });
+
+            // Animation controls
+            document.getElementById('playBtn').addEventListener('click', playAnimation);
+            document.getElementById('pauseBtn').addEventListener('click', pauseAnimation);
+            document.getElementById('addFrameBtn').addEventListener('click', addFrame);
+
+            // Other controls
+            document.getElementById('clearCanvas').addEventListener('click', clearCanvas);
+            document.getElementById('publishBtn').addEventListener('click', publishArt);
+
+            // Canvas login buttons
+            document.getElementById('loginFromCanvas').addEventListener('click', () => showModal('loginModal'));
+            document.getElementById('registerFromCanvas').addEventListener('click', () => showModal('registerModal'));
+
+            // Report button delegation
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('report-btn')) {
+                    showModal('reportModal');
+                }
+            });
+
+            // Initialize
+            updateFrameDisplay();
+            updateUIForLoginState();
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9612760e07ecf305',t:'MTc1Mjg0Njc2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96171a5d40277b41',t:'MTc1Mjg5NTQzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
