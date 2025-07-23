@@ -3,426 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SharedDraw - Create, Share, Connect</title>
+    <title>SharedDraw - Social Drawing Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #96ceb4 75%, #feca57 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 8s ease infinite;
-            min-height: 100vh;
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .neon-glow {
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
-        }
-        
-        .canvas-container {
-            border: 3px solid transparent;
-            border-radius: 20px;
-            background: linear-gradient(white, white) padding-box,
-                        linear-gradient(45deg, #ff6b6b, #4ecdc4, #feca57) border-box;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        
-        .tool-btn {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .tool-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
-        
-        .tool-btn:hover::before {
-            left: 100%;
-        }
-        
-        .tool-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        
-        .post-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(79, 70, 229, 0.1) 50%, rgba(236, 72, 153, 0.1) 100%);
-            backdrop-filter: blur(15px);
-        }
-        
-        .post-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-        }
-        
-        .heart-animation {
-            animation: heartBeat 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        
-        @keyframes heartBeat {
-            0% { transform: scale(1); }
-            30% { transform: scale(1.4); }
-            60% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        .notification {
-            animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        
         @keyframes slideIn {
-            from { transform: translateX(100%) scale(0.8); opacity: 0; }
-            to { transform: translateX(0) scale(1); opacity: 1; }
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
-        
-        .modal-backdrop {
-            backdrop-filter: blur(15px);
-            background: rgba(0, 0, 0, 0.3);
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #feca57 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
-        
-        .floating {
-            animation: floating 3s ease-in-out infinite;
-        }
-        
-        @keyframes floating {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .pulse-glow {
-            animation: pulseGlow 2s infinite;
-        }
-        
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(78, 205, 196, 0.6); }
-        }
-        
-        .mode-btn {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .mode-btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .mode-btn:hover::after {
-            width: 300px;
-            height: 300px;
-        }
+        .post-animation { animation: slideIn 0.5s ease-out; }
+        .heart-animation { animation: pulse 0.3s ease-in-out; }
+        .notification-bounce { animation: bounce 0.6s ease-in-out; }
+        .drawing-canvas { border: 2px solid #e5e7eb; border-radius: 8px; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
-    <!-- Navigation -->
-    <nav class="glass-effect shadow-2xl border-b border-white/20 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex items-center space-x-4">
-                    <div class="floating">
-                        <h1 class="text-3xl font-bold gradient-text">
-                            ✨ SharedDraw
-                        </h1>
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b-4 border-purple-500">
+        <div class="max-w-6xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">S</span>
                     </div>
+                    <h1 class="text-2xl font-bold text-gray-800">SharedDraw</h1>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div id="userSection" class="hidden items-center space-x-4">
-                        <button id="createBtn" class="tool-btn bg-gradient-to-r from-purple-500 to-pink-500 text-yellow-200 px-6 py-3 rounded-full hover:from-purple-600 hover:to-pink-600 font-semibold neon-glow">
-                            🎨 Create
-                        </button>
-                        <span id="welcomeText" class="text-yellow-200 font-semibold text-lg"></span>
-                        <button id="logoutBtn" class="text-yellow-200/80 hover:text-yellow-200 transition-all font-medium">
-                            Logout
-                        </button>
-                    </div>
-                    <div id="authSection" class="flex items-center space-x-4">
-                        <button id="loginBtn" class="tool-btn glass-effect text-yellow-200 px-6 py-3 rounded-full hover:bg-white/10 font-semibold border-2 border-yellow-200/50 hover:border-yellow-200 transition-all shadow-lg">
-                            Login
-                        </button>
-                        <button id="registerBtn" class="tool-btn bg-gradient-to-r from-cyan-500 to-blue-500 text-yellow-200 px-6 py-3 rounded-full hover:from-cyan-600 hover:to-blue-600 font-semibold">
-                            Register
-                        </button>
-                    </div>
+                
+                <!-- Search Bar -->
+                <div class="flex-1 max-w-md mx-8">
+                    <input type="text" id="searchInput" placeholder="Search users..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <div id="searchResults" class="absolute bg-white mt-1 rounded-lg shadow-lg hidden z-50 max-w-md"></div>
+                </div>
+
+                <!-- Auth Buttons -->
+                <div id="authButtons" class="flex space-x-3">
+                    <button onclick="showLogin()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition">Login</button>
+                    <button onclick="showRegister()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Register</button>
+                </div>
+
+                <!-- User Menu -->
+                <div id="userMenu" class="hidden flex items-center space-x-4">
+                    <span id="welcomeText" class="text-gray-700"></span>
+                    <button onclick="toggleDrawMode()" id="drawModeBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">Draw</button>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Logout</button>
                 </div>
             </div>
         </div>
-    </nav>
+    </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Creator Studio (Hidden by default) -->
-        <div id="creatorStudio" class="hidden">
-            <div class="glass-effect rounded-3xl shadow-2xl p-8 mb-8 pulse-glow">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-3xl font-bold gradient-text floating">🎨 Creator Studio</h2>
-                    <div class="flex glass-effect rounded-2xl p-2 border border-white/30">
-                        <button id="drawingMode" class="mode-btn bg-gradient-to-r from-purple-500 to-pink-500 text-yellow-200 px-8 py-3 rounded-xl font-semibold transition-all shadow-lg">
-                            🎨 Drawing
-                        </button>
-                        <button id="animationMode" class="mode-btn bg-transparent text-white/80 px-8 py-3 rounded-xl font-semibold transition-all hover:bg-white/10">
-                            ✨ Animation
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Mode Instructions -->
-                <div id="modeInstructions" class="glass-effect border border-white/30 rounded-2xl p-6 mb-8">
-                    <div id="drawingInstructions" class="flex items-center space-x-4">
-                        <span class="text-4xl floating">🎨</span>
-                        <div>
-                            <h3 class="font-bold text-yellow-200 text-xl">Drawing Mode Active</h3>
-                            <p class="text-yellow-200/80 text-base">Click and drag to draw. Use the tools below to customize your brush.</p>
-                        </div>
-                    </div>
-                    <div id="animationInstructions" class="hidden flex items-center space-x-4">
-                        <span class="text-4xl floating">✨</span>
-                        <div>
-                            <h3 class="font-bold text-yellow-200 text-xl">Animation Mode Active</h3>
-                            <p class="text-yellow-200/80 text-base">Draw frame by frame! Use "Add Frame" to create animation sequences.</p>
-                        </div>
-                    </div>
-                </div>
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Drawing Mode -->
+        <div id="drawingMode" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Create Your Drawing</h2>
                 
                 <!-- Drawing Tools -->
-                <div class="flex flex-wrap gap-6 mb-8">
-                    <button id="brushTool" class="tool-btn bg-gradient-to-r from-purple-500 to-pink-500 text-yellow-200 px-6 py-3 rounded-2xl font-semibold shadow-lg">🖌️ Brush</button>
-                    <button id="eraserTool" class="tool-btn glass-effect text-yellow-200 px-6 py-3 rounded-2xl font-semibold border border-white/30">🧽 Eraser</button>
-                    <div class="flex items-center space-x-3 glass-effect px-4 py-3 rounded-2xl border border-white/30">
-                        <span class="text-base font-semibold text-yellow-200">Color:</span>
-                        <input type="color" id="colorPicker" value="#000000" class="w-12 h-12 rounded-xl border-3 border-white/50 cursor-pointer shadow-lg">
-                    </div>
-                    <div class="flex items-center space-x-3 glass-effect px-4 py-3 rounded-2xl border border-white/30">
-                        <span class="text-base font-semibold text-yellow-200">Size:</span>
-                        <input type="range" id="brushSize" min="1" max="20" value="5" class="w-32 accent-purple-500">
-                        <span id="sizeDisplay" class="text-base font-bold text-yellow-200 w-8 text-center">5</span>
-                    </div>
-                    <button id="clearCanvas" class="tool-btn bg-gradient-to-r from-red-500 to-pink-500 text-yellow-200 px-6 py-3 rounded-2xl font-semibold shadow-lg">🗑️ Clear</button>
+                <div class="flex items-center space-x-4 mb-4">
+                    <label class="text-gray-700">Brush Size:</label>
+                    <input type="range" id="brushSize" min="1" max="20" value="5" class="w-32">
+                    <span id="brushSizeValue" class="text-gray-600">5px</span>
+                    
+                    <label class="text-gray-700 ml-6">Color:</label>
+                    <input type="color" id="brushColor" value="#000000" class="w-12 h-8 rounded border">
+                    
+                    <button onclick="clearCanvas()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition ml-6">Clear</button>
                 </div>
-                
-                <!-- Animation Controls (Hidden by default) -->
-                <div id="animationControls" class="hidden glass-effect border border-white/30 rounded-2xl p-6 mb-8">
-                    <div class="flex flex-wrap items-center gap-6">
-                        <button id="addFrame" class="tool-btn bg-gradient-to-r from-blue-500 to-cyan-500 text-yellow-200 px-6 py-3 rounded-2xl font-semibold shadow-lg">
-                            ➕ Add Frame
-                        </button>
-                        <button id="playAnimation" class="tool-btn bg-gradient-to-r from-green-500 to-emerald-500 text-yellow-200 px-6 py-3 rounded-2xl font-semibold shadow-lg">
-                            ▶️ Play
-                        </button>
-                        <button id="stopAnimation" class="tool-btn bg-gradient-to-r from-gray-500 to-slate-500 text-yellow-200 px-6 py-3 rounded-2xl font-semibold shadow-lg">
-                            ⏹️ Stop
-                        </button>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-base font-semibold text-yellow-200">Frame:</span>
-                            <span id="currentFrame" class="glass-effect px-4 py-2 rounded-xl border border-white/30 text-base font-bold text-yellow-200">1 / 1</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-base font-semibold text-yellow-200">Speed:</span>
-                            <input type="range" id="animationSpeed" min="100" max="1000" value="500" class="w-32 accent-cyan-500">
-                            <span class="text-base text-yellow-200/80 font-medium">ms</span>
-                        </div>
-                    </div>
-                </div>
-                
+
                 <!-- Canvas -->
-                <div class="canvas-container mb-6">
-                    <canvas id="drawingCanvas" width="800" height="400" class="w-full rounded-lg"></canvas>
-                </div>
+                <canvas id="drawingCanvas" width="800" height="400" class="drawing-canvas bg-white mb-4"></canvas>
                 
                 <!-- Post Controls -->
-                <div class="flex justify-between items-center gap-6">
-                    <input type="text" id="postTitle" placeholder="Give your creation a title..." class="flex-1 px-6 py-4 glass-effect border border-white/30 rounded-2xl focus:ring-2 focus:ring-purple-400 focus:border-transparent text-yellow-200 placeholder-yellow-200/60 text-lg font-medium">
-                    <button id="sharePost" class="tool-btn bg-gradient-to-r from-green-500 to-blue-500 text-yellow-200 px-8 py-4 rounded-2xl font-bold text-lg shadow-xl neon-glow">
-                        🚀 Share Creation
-                    </button>
+                <div class="flex items-center space-x-4">
+                    <input type="text" id="postCaption" placeholder="Add a caption..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <button onclick="publishDrawing()" class="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition">Publish</button>
                 </div>
             </div>
         </div>
 
         <!-- Feed -->
-        <div id="feedSection">
-            <h2 class="text-4xl font-bold gradient-text mb-8 floating">🌟 Community Feed</h2>
-            <div id="postsContainer" class="space-y-8">
-                <!-- Sample posts will be generated here -->
-            </div>
+        <div id="feedMode">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Community Feed</h2>
+            <div id="postsContainer" class="space-y-6"></div>
         </div>
     </main>
 
     <!-- Login Modal -->
-    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50">
-        <div class="glass-effect rounded-3xl p-10 max-w-md w-full mx-4 border border-white/30 shadow-2xl">
-            <div class="text-center mb-8">
-                <h3 class="text-3xl font-bold gradient-text mb-2">🚀 Welcome Back!</h3>
-                <p class="text-yellow-200/80 text-lg">Login to SharedDraw</p>
-            </div>
-            <form id="loginForm">
-                <div class="mb-6">
-                    <label class="block text-yellow-200 font-semibold text-base mb-3">Username</label>
-                    <input type="text" id="loginUsername" class="w-full px-6 py-4 glass-effect border border-white/30 rounded-2xl focus:ring-2 focus:ring-purple-400 focus:border-transparent text-yellow-200 placeholder-yellow-200/60 text-lg font-medium" placeholder="Enter your username" required>
-                </div>
-                <div class="mb-8">
-                    <label class="block text-yellow-200 font-semibold text-base mb-3">Password</label>
-                    <input type="password" id="loginPassword" class="w-full px-6 py-4 glass-effect border border-white/30 rounded-2xl focus:ring-2 focus:ring-purple-400 focus:border-transparent text-yellow-200 placeholder-yellow-200/60 text-lg font-medium" placeholder="Enter your password" required>
-                </div>
-                <div class="flex justify-between items-center gap-4">
-                    <button type="button" id="cancelLogin" class="tool-btn glass-effect text-yellow-200/80 hover:text-yellow-200 px-6 py-3 rounded-2xl font-semibold border border-white/30 transition-all">Cancel</button>
-                    <button type="submit" class="tool-btn bg-gradient-to-r from-purple-500 to-pink-500 text-yellow-200 px-8 py-3 rounded-2xl hover:from-purple-600 hover:to-pink-600 font-bold text-lg shadow-xl neon-glow">Login ✨</button>
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Login</h3>
+            <form onsubmit="handleLogin(event)">
+                <input type="text" id="loginUsername" placeholder="Username" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <input type="password" id="loginPassword" placeholder="Password" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition">Login</button>
+                    <button type="button" onclick="closeModal('loginModal')" class="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Register Modal -->
-    <div id="registerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50">
-        <div class="glass-effect rounded-3xl p-10 max-w-md w-full mx-4 border border-white/30 shadow-2xl">
-            <div class="text-center mb-8">
-                <h3 class="text-3xl font-bold gradient-text mb-2">🎨 Join the Community!</h3>
-                <p class="text-yellow-200/80 text-lg">Create your SharedDraw account</p>
-            </div>
-            <form id="registerForm">
-                <div class="mb-6">
-                    <label class="block text-yellow-200 font-semibold text-base mb-3">Username</label>
-                    <input type="text" id="registerUsername" class="w-full px-6 py-4 glass-effect border border-white/30 rounded-2xl focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-yellow-200 placeholder-yellow-200/60 text-lg font-medium" placeholder="Choose a username" required>
-                </div>
-                <div class="mb-6">
-                    <label class="block text-yellow-200 font-semibold text-base mb-3">Email</label>
-                    <input type="email" id="registerEmail" class="w-full px-6 py-4 glass-effect border border-white/30 rounded-2xl focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-yellow-200 placeholder-yellow-200/60 text-lg font-medium" placeholder="Enter your email" required>
-                </div>
-                <div class="mb-8">
-                    <label class="block text-yellow-200 font-semibold text-base mb-3">Password</label>
-                    <input type="password" id="registerPassword" class="w-full px-6 py-4 glass-effect border border-white/30 rounded-2xl focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-yellow-200 placeholder-yellow-200/60 text-lg font-medium" placeholder="Create a password" required>
-                </div>
-                <div class="flex justify-between items-center gap-4">
-                    <button type="button" id="cancelRegister" class="tool-btn glass-effect text-yellow-200/80 hover:text-yellow-200 px-6 py-3 rounded-2xl font-semibold border border-white/30 transition-all">Cancel</button>
-                    <button type="submit" class="tool-btn bg-gradient-to-r from-cyan-500 to-blue-500 text-yellow-200 px-8 py-3 rounded-2xl hover:from-cyan-600 hover:to-blue-600 font-bold text-lg shadow-xl neon-glow">Join Now 🚀</button>
+    <div id="registerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Register</h3>
+            <form onsubmit="handleRegister(event)">
+                <input type="text" id="registerUsername" placeholder="Username" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="email" id="registerEmail" placeholder="Email" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="registerPassword" placeholder="Password" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition">Register</button>
+                    <button type="button" onclick="closeModal('registerModal')" class="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition">Cancel</button>
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Developer Panel -->
+    <div id="devPanel" class="hidden fixed top-20 right-4 bg-red-600 text-white p-4 rounded-lg shadow-lg z-40">
+        <h4 class="font-bold mb-2">🛡️ Developer Panel</h4>
+        <div id="reportsList" class="space-y-2 max-h-60 overflow-y-auto"></div>
     </div>
 
     <!-- Report Modal -->
-    <div id="reportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50">
-        <div class="glass-effect rounded-3xl p-10 max-w-md w-full mx-4 border border-white/30 shadow-2xl">
-            <div class="text-center mb-8">
-                <h3 class="text-3xl font-bold gradient-text mb-2">⚠️ Report Content</h3>
-                <p class="text-yellow-200/80 text-lg">Help keep our community safe</p>
-            </div>
-            <form id="reportForm">
-                <div class="mb-6">
-                    <label class="block text-yellow-200 font-semibold text-base mb-3">Reason for Report</label>
-                    <select id="reportReason" class="w-full px-6 py-4 glass-effect border border-white/30 rounded-2xl focus:ring-2 focus:ring-red-400 focus:border-transparent text-yellow-200 bg-white/10" required>
-                        <option value="" class="text-gray-800">Select a reason...</option>
-                        <option value="inappropriate" class="text-gray-800">Inappropriate Content</option>
-                        <option value="spam" class="text-gray-800">Spam</option>
-                        <option value="harassment" class="text-gray-800">Harassment</option>
-                        <option value="copyright" class="text-gray-800">Copyright Violation</option>
-                        <option value="other" class="text-gray-800">Other</option>
-                    </select>
-                </div>
-                <div class="mb-8">
-                    <label class="block text-yellow-200 font-semibold text-base mb-3">Additional Details</label>
-                    <textarea id="reportDetails" rows="3" class="w-full px-6 py-4 glass-effect border border-white/30 rounded-2xl focus:ring-2 focus:ring-red-400 focus:border-transparent text-yellow-200 placeholder-yellow-200/60 text-lg font-medium" placeholder="Please provide more details..."></textarea>
-                </div>
-                <div class="flex justify-between items-center gap-4">
-                    <button type="button" id="cancelReport" class="tool-btn glass-effect text-white/80 hover:text-white px-6 py-3 rounded-2xl font-semibold border border-white/30 transition-all">Cancel</button>
-                    <button type="submit" class="tool-btn bg-gradient-to-r from-red-500 to-pink-500 text-yellow-200 px-8 py-3 rounded-2xl hover:from-red-600 hover:to-pink-600 font-bold text-lg shadow-xl neon-glow">Submit Report 🚨</button>
+    <div id="reportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Report Post</h3>
+            <form onsubmit="submitReport(event)">
+                <textarea id="reportReason" placeholder="Reason for reporting..." required 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-6 h-32 focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition">Submit Report</button>
+                    <button type="button" onclick="closeModal('reportModal')" class="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Admin Panel -->
-    <div id="adminPanel" class="hidden fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50">
-        <div class="glass-effect rounded-3xl p-10 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-white/30 shadow-2xl">
-            <div class="flex justify-between items-center mb-8">
-                <div class="text-center">
-                    <h3 class="text-3xl font-bold gradient-text mb-2">🛡️ Admin Panel</h3>
-                    <p class="text-white/80 text-lg">Manage community and reports</p>
-                </div>
-                <button id="closeAdmin" class="text-white/80 hover:text-white text-3xl font-bold transition-all">&times;</button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Reports Section -->
-                <div class="glass-effect border border-white/30 rounded-2xl p-8">
-                    <h4 class="text-2xl font-bold text-white mb-6 flex items-center">
-                        <span class="mr-3">📋</span>
-                        Pending Reports
-                    </h4>
-                    <div id="reportsList" class="space-y-4">
-                        <!-- Reports will be populated here -->
-                    </div>
-                </div>
-                
-                <!-- User Management -->
-                <div class="glass-effect border border-white/30 rounded-2xl p-8">
-                    <h4 class="text-2xl font-bold text-white mb-6 flex items-center">
-                        <span class="mr-3">👥</span>
-                        User Management
-                    </h4>
-                    <div id="usersList" class="space-y-4">
-                        <!-- Users will be populated here -->
-                    </div>
-                </div>
+    <!-- Ban Modal -->
+    <div id="banModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-red-600 mb-6">Ban User</h3>
+            <p class="text-gray-700 mb-4">Are you sure you want to ban user: <span id="banUsername" class="font-bold"></span>?</p>
+            <p class="text-sm text-gray-600 mb-6">Post ID: <span id="banPostId"></span></p>
+            <div class="flex space-x-4">
+                <button onclick="confirmBan()" class="flex-1 bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition">Ban User</button>
+                <button onclick="closeModal('banModal')" class="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Notifications -->
-    <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    <!-- Profile Modal -->
+    <div id="profileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-4">
+                    <div id="profileAvatar" class="w-16 h-16 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full flex items-center justify-center">
+                        <span id="profileAvatarText" class="text-white text-2xl font-bold"></span>
+                    </div>
+                    <div>
+                        <h3 id="profileUsername" class="text-2xl font-bold text-gray-800"></h3>
+                        <p id="profileStats" class="text-gray-600"></p>
+                    </div>
+                </div>
+                <button onclick="closeModal('profileModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            
+            <div class="border-t pt-6">
+                <h4 class="text-lg font-bold text-gray-800 mb-4">Recent Posts</h4>
+                <div id="profilePosts" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Global state
         let currentUser = null;
         let isDrawing = false;
-        let currentTool = 'brush';
-        let currentColor = '#000000';
-        let currentSize = 5;
+        let canvas, ctx;
         let posts = [];
-        let reports = [];
         let users = [];
-        let reportIdCounter = 1;
-        let currentMode = 'drawing';
-        let animationFrames = [];
-        let currentFrameIndex = 0;
-        let animationInterval = null;
+        let reports = [];
+        let bannedUsers = [];
+        let currentReportPostId = null;
+        let currentBanData = null;
 
         // Developer accounts
         const developers = {
@@ -430,47 +208,58 @@
             'ChingTheDev': 'imadmin02'
         };
 
-        // Registered users database (username: password)
-        const registeredUsers = {};
-
-        // Initialize sample data
-        function initializeSampleData() {
-            posts = [];
-            users = [];
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCanvas();
+            loadSampleData();
             renderFeed();
+            setupSearch();
+            
+            // Check if user was previously logged in
+            const savedUser = localStorage.getItem('sharedrawUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUIForLoggedInUser();
+            }
+        });
+
+        function initializeCanvas() {
+            canvas = document.getElementById('drawingCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Canvas event listeners
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Brush size slider
+            document.getElementById('brushSize').addEventListener('input', function() {
+                document.getElementById('brushSizeValue').textContent = this.value + 'px';
+            });
         }
 
-        // Canvas setup
-        const canvas = document.getElementById('drawingCanvas');
-        const ctx = canvas.getContext('2d');
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-        // Drawing functions
         function startDrawing(e) {
             if (!currentUser) return;
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
             ctx.beginPath();
-            ctx.moveTo(x, y);
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
         }
 
         function draw(e) {
             if (!isDrawing || !currentUser) return;
-            
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const brushSize = document.getElementById('brushSize').value;
+            const brushColor = document.getElementById('brushColor').value;
             
-            ctx.lineWidth = currentSize;
-            ctx.strokeStyle = currentTool === 'eraser' ? '#FFFFFF' : currentColor;
-            ctx.lineTo(x, y);
+            ctx.lineWidth = brushSize;
+            ctx.strokeStyle = brushColor;
+            ctx.lineCap = 'round';
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(x, y);
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
         }
 
         function stopDrawing() {
@@ -478,242 +267,272 @@
             ctx.beginPath();
         }
 
-        // Canvas event listeners
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-
-        // Tool controls
-        document.getElementById('brushTool').addEventListener('click', () => {
-            currentTool = 'brush';
-            updateToolButtons();
-        });
-
-        document.getElementById('eraserTool').addEventListener('click', () => {
-            currentTool = 'eraser';
-            updateToolButtons();
-        });
-
-        document.getElementById('colorPicker').addEventListener('change', (e) => {
-            currentColor = e.target.value;
-        });
-
-        document.getElementById('brushSize').addEventListener('input', (e) => {
-            currentSize = e.target.value;
-            document.getElementById('sizeDisplay').textContent = currentSize;
-        });
-
-        document.getElementById('clearCanvas').addEventListener('click', () => {
+        function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
-
-        function updateToolButtons() {
-            document.querySelectorAll('.tool-btn').forEach(btn => {
-                btn.classList.remove('bg-purple-600', 'text-white');
-                btn.classList.add('bg-gray-200');
-            });
-            
-            if (currentTool === 'brush') {
-                document.getElementById('brushTool').classList.add('bg-purple-600', 'text-white');
-            } else if (currentTool === 'eraser') {
-                document.getElementById('eraserTool').classList.add('bg-purple-600', 'text-white');
-            }
         }
 
-        // Authentication
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            document.getElementById('loginModal').classList.remove('hidden');
-        });
-
-        document.getElementById('registerBtn').addEventListener('click', () => {
-            document.getElementById('registerModal').classList.remove('hidden');
-        });
-
-        document.getElementById('cancelLogin').addEventListener('click', () => {
-            document.getElementById('loginModal').classList.add('hidden');
-        });
-
-        document.getElementById('cancelRegister').addEventListener('click', () => {
-            document.getElementById('registerModal').classList.add('hidden');
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            // Check developer accounts first
-            if (developers[username] && developers[username] === password) {
-                currentUser = { username, isDeveloper: true };
-                showNotification('🔥 Developer access granted!', 'success');
-                updateUI();
-                document.getElementById('loginModal').classList.add('hidden');
-                document.getElementById('adminPanel').classList.remove('hidden');
-                loadAdminData();
+        function publishDrawing() {
+            if (!currentUser) {
+                alert('Please log in to publish drawings');
                 return;
             }
             
-            // Check registered users
-            if (registeredUsers[username] && registeredUsers[username] === password) {
-                currentUser = { username, isDeveloper: false };
-                if (!users.includes(username)) {
-                    users.push(username);
-                }
-                showNotification('✨ Welcome back!', 'success');
-                updateUI();
-                document.getElementById('loginModal').classList.add('hidden');
-                return;
-            }
+            const caption = document.getElementById('postCaption').value;
+            const imageData = canvas.toDataURL();
             
-            // If we get here, login failed
-            showNotification('❌ Invalid credentials', 'error');
-        });
-
-        document.getElementById('registerForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('registerUsername').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            
-            // Check if username already exists
-            if (registeredUsers[username] || developers[username]) {
-                showNotification('Username already exists!', 'error');
-                return;
-            }
-            
-            if (username && email && password) {
-                // Save the new user with their password
-                registeredUsers[username] = password;
-                currentUser = { username, isDeveloper: false };
-                if (!users.includes(username)) {
-                    users.push(username);
-                }
-                showNotification('🎉 Welcome to SharedDraw!', 'success');
-                updateUI();
-                document.getElementById('registerModal').classList.add('hidden');
-            }
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            currentUser = null;
-            updateUI();
-            showNotification('👋 See you later!', 'info');
-        });
-
-        // UI Updates
-        function updateUI() {
-            if (currentUser) {
-                document.getElementById('authSection').classList.add('hidden');
-                document.getElementById('userSection').classList.remove('hidden');
-                document.getElementById('userSection').classList.add('flex');
-                document.getElementById('welcomeText').textContent = `Welcome, ${currentUser.username}!`;
-                document.getElementById('creatorStudio').classList.remove('hidden');
+            if (ctx.getImageData(0, 0, canvas.width, canvas.height).data.some(channel => channel !== 0)) {
+                const post = {
+                    id: Date.now(),
+                    author: currentUser.username,
+                    caption: caption || 'Untitled Drawing',
+                    image: imageData,
+                    timestamp: new Date().toISOString(),
+                    likes: 0,
+                    likedBy: [],
+                    comments: []
+                };
+                
+                posts.unshift(post);
+                clearCanvas();
+                document.getElementById('postCaption').value = '';
+                renderFeed();
+                
+                // Show success notification
+                showNotification('Drawing published successfully!', 'success');
             } else {
-                document.getElementById('authSection').classList.remove('hidden');
-                document.getElementById('userSection').classList.add('hidden');
-                document.getElementById('creatorStudio').classList.add('hidden');
+                alert('Please draw something before publishing!');
             }
         }
 
-        // Create and Share Posts
-        document.getElementById('sharePost').addEventListener('click', () => {
-            if (!currentUser) return;
-            
-            const title = document.getElementById('postTitle').value || 'Untitled Creation';
-            const canvasData = canvas.toDataURL();
-            
-            const newPost = {
-                id: posts.length + 1,
-                author: currentUser.username,
-                title: title,
-                content: '🎨 ' + title,
-                canvasData: canvasData,
-                likes: 0,
-                comments: [],
-                timestamp: new Date().toLocaleString()
-            };
-            
-            posts.unshift(newPost);
-            renderFeed();
-            document.getElementById('postTitle').value = '';
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            showNotification('🚀 Your masterpiece is live!', 'success');
-        });
+        function loadSampleData() {
+            // Sample users
+            users = [
+                { username: 'ArtistAlice', email: 'alice@example.com', isDev: false },
+                { username: 'CreativeBob', email: 'bob@example.com', isDev: false },
+                { username: 'SketchySarah', email: 'sarah@example.com', isDev: false }
+            ];
 
-        // Feed rendering
+            // Sample posts with SVG drawings
+            posts = [
+                {
+                    id: 1,
+                    author: 'ArtistAlice',
+                    caption: 'Beautiful sunset landscape 🌅',
+                    image: createSampleDrawing('sunset'),
+                    timestamp: new Date(Date.now() - 3600000).toISOString(),
+                    likes: 15,
+                    likedBy: ['CreativeBob'],
+                    comments: [
+                        { author: 'CreativeBob', text: 'Amazing colors!', timestamp: new Date(Date.now() - 1800000).toISOString() }
+                    ]
+                },
+                {
+                    id: 2,
+                    author: 'CreativeBob',
+                    caption: 'Abstract art experiment 🎨',
+                    image: createSampleDrawing('abstract'),
+                    timestamp: new Date(Date.now() - 7200000).toISOString(),
+                    likes: 8,
+                    likedBy: [],
+                    comments: []
+                },
+                {
+                    id: 3,
+                    author: 'SketchySarah',
+                    caption: 'Quick doodle of my cat 🐱',
+                    image: createSampleDrawing('cat'),
+                    timestamp: new Date(Date.now() - 10800000).toISOString(),
+                    likes: 23,
+                    likedBy: ['ArtistAlice', 'CreativeBob'],
+                    comments: [
+                        { author: 'ArtistAlice', text: 'So cute!', timestamp: new Date(Date.now() - 9000000).toISOString() }
+                    ]
+                }
+            ];
+        }
+
+        function createSampleDrawing(type) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 400;
+            const ctx = canvas.getContext('2d');
+            
+            // Create different sample drawings
+            if (type === 'sunset') {
+                // Gradient background
+                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, '#ff6b6b');
+                gradient.addColorStop(0.5, '#ffa500');
+                gradient.addColorStop(1, '#ffeb3b');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 800, 400);
+                
+                // Sun
+                ctx.fillStyle = '#ff4444';
+                ctx.beginPath();
+                ctx.arc(400, 200, 60, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'abstract') {
+                // Colorful shapes
+                const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6'];
+                for (let i = 0; i < 10; i++) {
+                    ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                    ctx.fillRect(Math.random() * 700, Math.random() * 300, 100, 100);
+                }
+            } else if (type === 'cat') {
+                // Simple cat drawing
+                ctx.fillStyle = '#8b4513';
+                // Body
+                ctx.fillRect(300, 250, 200, 100);
+                // Head
+                ctx.beginPath();
+                ctx.arc(400, 200, 80, 0, Math.PI * 2);
+                ctx.fill();
+                // Ears
+                ctx.beginPath();
+                ctx.moveTo(350, 150);
+                ctx.lineTo(370, 120);
+                ctx.lineTo(390, 150);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(410, 150);
+                ctx.lineTo(430, 120);
+                ctx.lineTo(450, 150);
+                ctx.fill();
+            }
+            
+            return canvas.toDataURL();
+        }
+
         function renderFeed() {
             const container = document.getElementById('postsContainer');
             container.innerHTML = '';
             
             posts.forEach(post => {
+                if (bannedUsers.includes(post.author)) return;
+                
                 const postElement = document.createElement('div');
-                postElement.className = 'post-card bg-white rounded-xl p-6';
+                postElement.className = 'bg-white rounded-xl shadow-lg p-6 post-animation';
+                
+                const isDev = developers.hasOwnProperty(post.author);
+                const devBadge = isDev ? '<span class="text-blue-500 ml-2">✓</span>' : '';
+                
                 postElement.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">${post.title}</h3>
-                            <p class="text-gray-600 text-sm">by ${post.author} • ${post.timestamp}</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full flex items-center justify-center cursor-pointer" onclick="showProfile('${post.author}')">
+                                <span class="text-white font-bold">${post.author[0].toUpperCase()}</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 cursor-pointer hover:text-purple-600" onclick="showProfile('${post.author}')">${post.author}${devBadge}</h3>
+                                <p class="text-sm text-gray-500">${formatTimestamp(post.timestamp)}</p>
+                            </div>
                         </div>
-                        ${currentUser ? `<button onclick="openReportModal(${post.id})" class="text-gray-400 hover:text-red-500 transition-colors">⚠️</button>` : ''}
+                        ${currentUser ? <button onclick="reportPost(${post.id})" class="text-red-500 hover:text-red-700 text-sm">Report</button> : ''}
                     </div>
                     
-                    ${post.canvasData ? `<img src="${post.canvasData}" class="w-full rounded-lg mb-4" alt="${post.title}">` : ''}
-                    <p class="text-gray-700 mb-4">${post.content}</p>
+                    <p class="text-gray-700 mb-4">${post.caption}</p>
+                    <img src="${post.image}" alt="Drawing" class="w-full rounded-lg mb-4 border">
                     
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            ${currentUser ? `<button onclick="likePost(${post.id})" class="flex items-center space-x-2 text-red-500 hover:text-red-600 transition-colors">
-                                <span class="text-xl">❤️</span>
-                                <span>${post.likes}</span>
-                            </button>` : `<span class="flex items-center space-x-2 text-gray-500">
-                                <span class="text-xl">❤️</span>
-                                <span>${post.likes}</span>
-                            </span>`}
+                            ${currentUser ? `
+                                <button onclick="toggleLike(${post.id})" class="flex items-center space-x-2 ${post.likedBy.includes(currentUser.username) ? 'text-red-500' : 'text-gray-500'} hover:text-red-500 transition">
+                                    <span class="text-xl">❤️</span>
+                                    <span>${post.likes}</span>
+                                </button>
+                             : 
+                                <div class="flex items-center space-x-2 text-gray-500">
+                                    <span class="text-xl">❤️</span>
+                                    <span>${post.likes}</span>
+                                </div>
+                            `}
+                            <span class="text-gray-500">${post.comments.length} comments</span>
                         </div>
                     </div>
                     
-                    <div class="mt-4 space-y-2">
-                        ${post.comments.map(comment => `
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <p class="text-gray-700 text-sm">${comment}</p>
-                            </div>
-                        `).join('')}
+                    <!-- Comments Section -->
+                    <div class="mt-4 border-t pt-4">
+                        <div class="space-y-3 mb-4">
+                            ${post.comments.map(comment => {
+                                const isCommentDev = developers.hasOwnProperty(comment.author);
+                                const commentDevBadge = isCommentDev ? '<span class="text-blue-500 ml-1">✓</span>' : '';
+                                return `
+                                <div class="flex space-x-3">
+                                    <div class="w-8 h-8 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center cursor-pointer" onclick="showProfile('${comment.author}')">
+                                        <span class="text-white text-sm font-bold">${comment.author[0].toUpperCase()}</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="bg-gray-100 rounded-lg px-3 py-2">
+                                            <p class="font-semibold text-sm text-gray-800 cursor-pointer hover:text-purple-600" onclick="showProfile('${comment.author}')">${comment.author}${commentDevBadge}</p>
+                                            <p class="text-gray-700">${comment.text}</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">${formatTimestamp(comment.timestamp)}</p>
+                                    </div>
+                                </div>
+                            `;}).join('')}
+                        </div>
                         
                         ${currentUser ? `
-                            <div class="flex space-x-2 mt-3">
-                                <input type="text" placeholder="Add a comment..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent" onkeypress="handleCommentKeypress(event, ${post.id})">
-                                <button onclick="addComment(${post.id})" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm">Post</button>
+                            <div class="flex space-x-3">
+                                <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full flex items-center justify-center">
+                                    <span class="text-white text-sm font-bold">${currentUser.username[0].toUpperCase()}</span>
+                                </div>
+                                <div class="flex-1 flex space-x-2">
+                                    <input type="text" placeholder="Add a comment..." 
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                           onkeypress="handleCommentKeypress(event, ${post.id})">
+                                    <button onclick="addComment(${post.id})" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition">Post</button>
+                                </div>
                             </div>
-                        ` : ''}
+                        ` : '<p class="text-gray-500 text-center">Log in to comment</p>'}
                     </div>
                 `;
+                
                 container.appendChild(postElement);
             });
         }
 
-        // Post interactions
-        function likePost(postId) {
+        function toggleLike(postId) {
             if (!currentUser) return;
+            
             const post = posts.find(p => p.id === postId);
-            if (post) {
+            if (!post) return;
+            
+            const userIndex = post.likedBy.indexOf(currentUser.username);
+            if (userIndex > -1) {
+                post.likedBy.splice(userIndex, 1);
+                post.likes--;
+            } else {
+                post.likedBy.push(currentUser.username);
                 post.likes++;
-                renderFeed();
-                // Add heart animation
-                event.target.classList.add('heart-animation');
-                setTimeout(() => event.target.classList.remove('heart-animation'), 300);
+                
+                // Heart animation
+                const heartBtn = event.target.closest('button');
+                heartBtn.classList.add('heart-animation');
+                setTimeout(() => heartBtn.classList.remove('heart-animation'), 300);
             }
+            
+            renderFeed();
         }
 
         function addComment(postId) {
             if (!currentUser) return;
-            const post = posts.find(p => p.id === postId);
-            const input = event.target.previousElementSibling;
-            const comment = input.value.trim();
             
-            if (post && comment) {
-                post.comments.push(comment);
-                input.value = '';
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+            
+            const commentInput = event.target.previousElementSibling;
+            const commentText = commentInput.value.trim();
+            
+            if (commentText) {
+                post.comments.push({
+                    author: currentUser.username,
+                    text: commentText,
+                    timestamp: new Date().toISOString()
+                });
+                
+                commentInput.value = '';
                 renderFeed();
             }
         }
@@ -724,252 +543,331 @@
             }
         }
 
-        // Reporting system
-        function openReportModal(postId) {
+        function reportPost(postId) {
+            currentReportPostId = postId;
             document.getElementById('reportModal').classList.remove('hidden');
-            document.getElementById('reportModal').dataset.postId = postId;
         }
 
-        document.getElementById('cancelReport').addEventListener('click', () => {
-            document.getElementById('reportModal').classList.add('hidden');
-        });
-
-        document.getElementById('reportForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const postId = parseInt(document.getElementById('reportModal').dataset.postId);
+        function submitReport(event) {
+            event.preventDefault();
+            
             const reason = document.getElementById('reportReason').value;
-            const details = document.getElementById('reportDetails').value;
-            const post = posts.find(p => p.id === postId);
+            const post = posts.find(p => p.id === currentReportPostId);
             
             if (post && reason) {
                 const report = {
-                    id: reportIdCounter++,
-                    postId: postId,
-                    postTitle: post.title,
+                    id: Date.now(),
+                    postId: currentReportPostId,
                     postAuthor: post.author,
                     reportedBy: currentUser.username,
                     reason: reason,
-                    details: details,
-                    timestamp: new Date().toLocaleString(),
-                    status: 'pending'
+                    timestamp: new Date().toISOString()
                 };
                 
                 reports.push(report);
-                showNotification('Report submitted successfully!', 'success');
-                document.getElementById('reportModal').classList.add('hidden');
-                document.getElementById('reportForm').reset();
+                updateDevPanel();
+                
+                closeModal('reportModal');
+                document.getElementById('reportReason').value = '';
+                showNotification('Report submitted successfully', 'success');
             }
-        });
-
-        // Admin panel
-        function loadAdminData() {
-            renderReports();
-            renderUsers();
         }
 
-        function renderReports() {
-            const container = document.getElementById('reportsList');
-            container.innerHTML = '';
+        function updateDevPanel() {
+            if (!currentUser || !developers.hasOwnProperty(currentUser.username)) return;
             
-            const pendingReports = reports.filter(r => r.status === 'pending');
+            const panel = document.getElementById('devPanel');
+            const reportsList = document.getElementById('reportsList');
             
-            if (pendingReports.length === 0) {
-                container.innerHTML = '<p class="text-white/60 text-base">No pending reports</p>';
+            if (reports.length > 0) {
+                panel.classList.remove('hidden');
+                reportsList.innerHTML = reports.map(report => `
+                    <div class="bg-red-700 p-3 rounded mb-2">
+                        <p class="font-bold">Post by: ${report.postAuthor}</p>
+                        <p class="text-sm">Reported by: ${report.reportedBy}</p>
+                        <p class="text-sm">Reason: ${report.reason}</p>
+                        <button onclick="showBanModal('${report.postAuthor}', ${report.postId})" 
+                                class="bg-red-800 text-white px-3 py-1 rounded mt-2 hover:bg-red-900 transition">
+                            Ban User
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+
+        function showBanModal(username, postId) {
+            currentBanData = { username, postId };
+            document.getElementById('banUsername').textContent = username;
+            document.getElementById('banPostId').textContent = postId;
+            document.getElementById('banModal').classList.remove('hidden');
+        }
+
+        function confirmBan() {
+            if (currentBanData) {
+                bannedUsers.push(currentBanData.username);
+                
+                // Remove reports for this user
+                reports = reports.filter(report => report.postAuthor !== currentBanData.username);
+                
+                updateDevPanel();
+                renderFeed();
+                closeModal('banModal');
+                
+                showNotification(User ${currentBanData.username} has been banned, 'success');
+                currentBanData = null;
+            }
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                
+                if (query.length > 0) {
+                    const filteredUsers = users.filter(user => 
+                        user.username.toLowerCase().includes(query) && 
+                        !bannedUsers.includes(user.username)
+                    );
+                    
+                    if (filteredUsers.length > 0) {
+                        searchResults.innerHTML = filteredUsers.map(user => {
+                            const isDev = developers.hasOwnProperty(user.username);
+                            const devBadge = isDev ? '<span class="text-blue-500 ml-2">✓</span>' : '';
+                            
+                            return `
+                                <div class="p-3 hover:bg-gray-100 cursor-pointer border-b" onclick="showProfile('${user.username}')">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full flex items-center justify-center">
+                                            <span class="text-white text-sm font-bold">${user.username[0].toUpperCase()}</span>
+                                        </div>
+                                        <span class="font-medium">${user.username}${devBadge}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                        searchResults.classList.remove('hidden');
+                    } else {
+                        searchResults.innerHTML = '<div class="p-3 text-gray-500">No users found</div>';
+                        searchResults.classList.remove('hidden');
+                    }
+                } else {
+                    searchResults.classList.add('hidden');
+                }
+            });
+            
+            // Hide search results when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        }
+
+        function showLogin() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('registerModal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Check if banned
+            if (bannedUsers.includes(username)) {
+                alert('This account has been banned.');
                 return;
             }
             
-            pendingReports.forEach(report => {
-                const reportElement = document.createElement('div');
-                reportElement.className = 'bg-white/10 backdrop-filter backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg';
-                reportElement.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <h5 class="font-bold text-white text-lg">Report #${report.id}</h5>
-                        <span class="text-sm text-white/60">${report.timestamp}</span>
-                    </div>
-                    <p class="text-base text-white/90 mb-2"><strong>Post:</strong> "${report.postTitle}" by ${report.postAuthor}</p>
-                    <p class="text-base text-white/90 mb-2"><strong>Reported by:</strong> ${report.reportedBy}</p>
-                    <p class="text-base text-white/90 mb-2"><strong>Reason:</strong> ${report.reason}</p>
-                    ${report.details ? `<p class="text-base text-white/90 mb-4"><strong>Details:</strong> ${report.details}</p>` : ''}
-                    <div class="flex space-x-3">
-                        <button onclick="resolveReport(${report.id})" class="bg-gradient-to-r from-green-500 to-emerald-500 text-yellow-200 px-4 py-2 rounded-xl text-sm font-semibold hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg">✅ Resolve</button>
-                        <button onclick="banUser('${report.postAuthor}')" class="bg-gradient-to-r from-red-500 to-pink-500 text-yellow-200 px-4 py-2 rounded-xl text-sm font-semibold hover:from-red-600 hover:to-pink-600 transition-all shadow-lg">🚫 Ban User</button>
-                    </div>
-                `;
-                container.appendChild(reportElement);
-            });
-        }
-
-        function renderUsers() {
-            const container = document.getElementById('usersList');
-            container.innerHTML = '';
+            // Check developer accounts
+            if (developers[username] === password) {
+                currentUser = { username, isDev: true };
+                localStorage.setItem('sharedrawUser', JSON.stringify(currentUser));
+                updateUIForLoggedInUser();
+                closeModal('loginModal');
+                showNotification(Welcome back, ${username}! 🛡️, 'success');
+                updateDevPanel();
+                return;
+            }
             
-            users.forEach(username => {
-                const userElement = document.createElement('div');
-                userElement.className = 'bg-white/10 backdrop-filter backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg flex justify-between items-center';
-                userElement.innerHTML = `
-                    <div>
-                        <p class="font-bold text-white text-lg">${username}</p>
-                        <p class="text-base text-white/70">Regular User</p>
+            // Check regular users
+            const user = users.find(u => u.username === username);
+            if (user) {
+                currentUser = { username, isDev: false };
+                localStorage.setItem('sharedrawUser', JSON.stringify(currentUser));
+                updateUIForLoggedInUser();
+                closeModal('loginModal');
+                showNotification(Welcome back, ${username}!, 'success');
+            } else {
+                alert('Invalid username or password');
+            }
+            
+            // Clear form
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            // Check if username already exists
+            if (users.some(u => u.username === username) || developers.hasOwnProperty(username)) {
+                alert('Username already exists');
+                return;
+            }
+            
+            // Add new user
+            const newUser = { username, email, isDev: false };
+            users.push(newUser);
+            
+            currentUser = { username, isDev: false };
+            localStorage.setItem('sharedrawUser', JSON.stringify(currentUser));
+            updateUIForLoggedInUser();
+            closeModal('registerModal');
+            showNotification(Welcome to SharedDraw, ${username}!, 'success');
+            
+            // Clear form
+            document.getElementById('registerUsername').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('sharedrawUser');
+            updateUIForLoggedOutUser();
+            showNotification('Logged out successfully', 'info');
+        }
+
+        function updateUIForLoggedInUser() {
+            document.getElementById('authButtons').classList.add('hidden');
+            document.getElementById('userMenu').classList.remove('hidden');
+            
+            const devBadge = currentUser.isDev ? ' 🛡️' : '';
+            document.getElementById('welcomeText').textContent = Welcome, ${currentUser.username}${devBadge};
+            
+            renderFeed();
+            
+            if (currentUser.isDev) {
+                updateDevPanel();
+            }
+        }
+
+        function updateUIForLoggedOutUser() {
+            document.getElementById('authButtons').classList.remove('hidden');
+            document.getElementById('userMenu').classList.add('hidden');
+            document.getElementById('drawingMode').classList.add('hidden');
+            document.getElementById('feedMode').classList.remove('hidden');
+            document.getElementById('drawModeBtn').textContent = 'Draw';
+            document.getElementById('devPanel').classList.add('hidden');
+            
+            renderFeed();
+        }
+
+        function toggleDrawMode() {
+            const drawingMode = document.getElementById('drawingMode');
+            const feedMode = document.getElementById('feedMode');
+            const drawModeBtn = document.getElementById('drawModeBtn');
+            
+            if (drawingMode.classList.contains('hidden')) {
+                drawingMode.classList.remove('hidden');
+                feedMode.classList.add('hidden');
+                drawModeBtn.textContent = 'Feed';
+            } else {
+                drawingMode.classList.add('hidden');
+                feedMode.classList.remove('hidden');
+                drawModeBtn.textContent = 'Draw';
+            }
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return ${Math.floor(diff / 60000)}m ago;
+            if (diff < 86400000) return ${Math.floor(diff / 3600000)}h ago;
+            return ${Math.floor(diff / 86400000)}d ago;
+        }
+
+        function showProfile(username) {
+            // Hide search results
+            document.getElementById('searchResults').classList.add('hidden');
+            
+            // Check if user exists and is not banned
+            if (bannedUsers.includes(username)) {
+                showNotification('This user has been banned', 'error');
+                return;
+            }
+            
+            const isDev = developers.hasOwnProperty(username);
+            const devBadge = isDev ? ' ✓' : '';
+            
+            // Get user's posts
+            const userPosts = posts.filter(post => post.author === username);
+            const totalLikes = userPosts.reduce((sum, post) => sum + post.likes, 0);
+            
+            // Update profile modal
+            document.getElementById('profileAvatarText').textContent = username[0].toUpperCase();
+            document.getElementById('profileUsername').textContent = username + devBadge;
+            document.getElementById('profileStats').textContent = ${userPosts.length} posts • ${totalLikes} total likes;
+            
+            // Render user's posts
+            const profilePostsContainer = document.getElementById('profilePosts');
+            if (userPosts.length > 0) {
+                profilePostsContainer.innerHTML = userPosts.map(post => `
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="font-medium text-gray-800">${post.caption}</p>
+                            <span class="text-sm text-gray-500">${formatTimestamp(post.timestamp)}</span>
+                        </div>
+                        <img src="${post.image}" alt="Drawing" class="w-full rounded-lg mb-2 border max-h-48 object-contain">
+                        <div class="flex items-center space-x-4 text-sm text-gray-600">
+                            <span>❤️ ${post.likes}</span>
+                            <span>💬 ${post.comments.length}</span>
+                        </div>
                     </div>
-                    <button onclick="banUser('${username}')" class="bg-gradient-to-r from-red-500 to-pink-500 text-yellow-200 px-4 py-2 rounded-xl text-sm font-semibold hover:from-red-600 hover:to-pink-600 transition-all shadow-lg">🚫 Ban</button>
-                `;
-                container.appendChild(userElement);
-            });
-        }
-
-        function resolveReport(reportId) {
-            const report = reports.find(r => r.id === reportId);
-            if (report) {
-                report.status = 'resolved';
-                renderReports();
-                showNotification('Report resolved!', 'success');
+                `).join('');
+            } else {
+                profilePostsContainer.innerHTML = '<p class="text-gray-500 text-center py-8">No posts yet</p>';
             }
+            
+            // Show profile modal
+            document.getElementById('profileModal').classList.remove('hidden');
         }
 
-        function banUser(username) {
-            if (confirm(`Are you sure you want to ban user "${username}"?`)) {
-                // Remove user's posts
-                posts = posts.filter(p => p.author !== username);
-                // Remove user from users list
-                const userIndex = users.indexOf(username);
-                if (userIndex > -1) {
-                    users.splice(userIndex, 1);
-                }
-                renderFeed();
-                renderUsers();
-                showNotification(`User "${username}" has been banned!`, 'success');
-            }
-        }
-
-        document.getElementById('closeAdmin').addEventListener('click', () => {
-            document.getElementById('adminPanel').classList.add('hidden');
-        });
-
-        // Notifications
-        function showNotification(message, type = 'info') {
+        function showNotification(message, type) {
             const notification = document.createElement('div');
-            notification.className = `notification px-8 py-4 rounded-2xl text-white font-bold text-lg shadow-2xl ${
-                type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 
-                type === 'error' ? 'bg-gradient-to-r from-red-500 to-pink-500' : 
-                type === 'warning' ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : 'bg-gradient-to-r from-blue-500 to-cyan-500'
-            } glass-effect border border-white/30`;
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 notification-bounce ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
             notification.textContent = message;
             
-            document.getElementById('notifications').appendChild(notification);
+            document.body.appendChild(notification);
             
             setTimeout(() => {
                 notification.remove();
-            }, 4000);
+            }, 3000);
         }
-
-        // Mode switching
-        document.getElementById('drawingMode').addEventListener('click', () => {
-            switchToDrawingMode();
-        });
-
-        document.getElementById('animationMode').addEventListener('click', () => {
-            switchToAnimationMode();
-        });
-
-        function switchToDrawingMode() {
-            currentMode = 'drawing';
-            
-            // Update button styles
-            document.getElementById('drawingMode').className = 'mode-btn bg-purple-600 text-white px-6 py-2 rounded-md font-medium transition-all';
-            document.getElementById('animationMode').className = 'mode-btn bg-transparent text-gray-600 px-6 py-2 rounded-md font-medium transition-all hover:bg-gray-200';
-            
-            // Update instructions
-            document.getElementById('drawingInstructions').classList.remove('hidden');
-            document.getElementById('animationInstructions').classList.add('hidden');
-            document.getElementById('modeInstructions').className = 'bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6';
-            
-            // Hide animation controls
-            document.getElementById('animationControls').classList.add('hidden');
-            
-            showNotification('🎨 Drawing mode activated!', 'success');
-        }
-
-        function switchToAnimationMode() {
-            currentMode = 'animation';
-            
-            // Update button styles
-            document.getElementById('animationMode').className = 'mode-btn bg-blue-600 text-white px-6 py-2 rounded-md font-medium transition-all';
-            document.getElementById('drawingMode').className = 'mode-btn bg-transparent text-gray-600 px-6 py-2 rounded-md font-medium transition-all hover:bg-gray-200';
-            
-            // Update instructions
-            document.getElementById('animationInstructions').classList.remove('hidden');
-            document.getElementById('drawingInstructions').classList.add('hidden');
-            document.getElementById('modeInstructions').className = 'bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6';
-            
-            // Show animation controls
-            document.getElementById('animationControls').classList.remove('hidden');
-            
-            // Initialize animation if needed
-            if (animationFrames.length === 0) {
-                addAnimationFrame();
-            }
-            
-            showNotification('✨ Animation mode activated!', 'info');
-        }
-
-        // Animation functions
-        function addAnimationFrame() {
-            const frameData = canvas.toDataURL();
-            animationFrames.push(frameData);
-            currentFrameIndex = animationFrames.length - 1;
-            updateFrameDisplay();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            showNotification(`Frame ${animationFrames.length} added!`, 'success');
-        }
-
-        function updateFrameDisplay() {
-            document.getElementById('currentFrame').textContent = `${currentFrameIndex + 1} / ${animationFrames.length}`;
-        }
-
-        function playAnimation() {
-            if (animationFrames.length < 2) {
-                showNotification('Add more frames to play animation!', 'warning');
-                return;
-            }
-            
-            if (animationInterval) {
-                clearInterval(animationInterval);
-            }
-            
-            const speed = document.getElementById('animationSpeed').value;
-            let frameIndex = 0;
-            
-            animationInterval = setInterval(() => {
-                const img = new Image();
-                img.onload = () => {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 0, 0);
-                };
-                img.src = animationFrames[frameIndex];
-                
-                frameIndex = (frameIndex + 1) % animationFrames.length;
-            }, parseInt(speed));
-            
-            showNotification('🎬 Animation playing!', 'info');
-        }
-
-        function stopAnimation() {
-            if (animationInterval) {
-                clearInterval(animationInterval);
-                animationInterval = null;
-                showNotification('⏹️ Animation stopped!', 'info');
-            }
-        }
-
-        // Animation control event listeners
-        document.getElementById('addFrame').addEventListener('click', addAnimationFrame);
-        document.getElementById('playAnimation').addEventListener('click', playAnimation);
-        document.getElementById('stopAnimation').addEventListener('click', stopAnimation);
-
-        // Initialize the app
-        initializeSampleData();
-        updateUI();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96194251f1e7a62b',t:'MTc1MjkxODA0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'962937b7d029731f',t:'MTc1MzA4NTM4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
 
